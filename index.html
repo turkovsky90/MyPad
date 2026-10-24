@@ -29,6 +29,27 @@ body{
           calc(8px + env(safe-area-inset-bottom)) calc(8px + env(safe-area-inset-left));
   gap:0;
 }
+#tabs{
+  flex:0 0 auto;
+  white-space:pre-wrap;
+  line-height:1.5;
+  word-break:keep-all;
+  overflow:hidden;
+  font:inherit;
+  color:var(--fg);
+  background:transparent;
+}
+#tabs .tab{
+  display:inline-block;
+  vertical-align:top;
+  cursor:default;
+  -webkit-tap-highlight-color:transparent;
+}
+#tabs .tab-active .tb-name,
+#tabs .tab-active .tb-close{color:var(--fg)}
+#tabs .tab-inactive .tb-name,
+#tabs .tab-inactive .tb-close{color:var(--dim)}
+#tabs .tb-add{color:var(--fg);cursor:default;-webkit-tap-highlight-color:transparent;display:inline-block;vertical-align:top}
 #toolbar{
   flex:0 0 auto;
   white-space:pre-wrap;
@@ -82,6 +103,7 @@ body{
 </style>
 </head>
 <body>
+<div id="tabs"></div>
 <div id="toolbar"><span class="act o" data-act="save">[save]</span> <span class="act b" data-act="open">[open]</span> <span class="act p" data-act="all">[all]</span> <span class="act g" data-act="tab">[tab]</span> <span class="act g" data-act="untab">[untab]</span> <span class="act c" data-act="wrap" id="wrapBtn">[wrap-]</span> <span class="act r" data-act="pgup">[pgup]</span> <span class="act r" data-act="pgdn">[pgdn]</span></div>
 <div id="stats"></div>
 <textarea id="ta" spellcheck="false" autocapitalize="off" autocorrect="off" autocomplete="off" aria-label="editor"></textarea>
@@ -90,16 +112,15 @@ body{
 (function(){
 'use strict';
 
-var KEY_TEXT='asciinote.text', KEY_NAME='asciinote.name', KEY_WRAP='asciinote.wrap', DEF_NAME='index.html';
+var KEY_TABS='asciinote.tabs', KEY_ACTIVE='asciinote.active', KEY_WRAP='asciinote.wrap', DEF_NAME='index.html';
 var INDENT='  ';
-
-try{ if(localStorage.getItem(KEY_NAME)==='note.html') localStorage.removeItem(KEY_NAME); }catch(e){}
 
 var ta=document.getElementById('ta');
 var statsEl=document.getElementById('stats');
 var fileEl=document.getElementById('file');
 var wrapBtn=document.getElementById('wrapBtn');
 var toolbar=document.getElementById('toolbar');
+var tabsEl=document.getElementById('tabs');
 
 var wrapMode=false;
 try{ wrapMode = localStorage.getItem(KEY_WRAP)==='1'; }catch(e){}
@@ -107,7 +128,64 @@ try{ wrapMode = localStorage.getItem(KEY_WRAP)==='1'; }catch(e){}
 function lsGet(k){try{return localStorage.getItem(k)||''}catch(e){return ''}}
 function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
 
-ta.value = lsGet(KEY_TEXT);
+function escHtml(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function loadTabsData(){
+  var raw = lsGet(KEY_TABS);
+  if(raw){
+    try{
+      var parsed = JSON.parse(raw);
+      if(Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }catch(e){}
+  }
+  var oldText = lsGet('asciinote.text');
+  var oldName = lsGet('asciinote.name') || DEF_NAME;
+  if(oldName === 'note.html') oldName = DEF_NAME;
+  return [{id:1, name:oldName, content:oldText || ''}];
+}
+
+var tabs = loadTabsData();
+var activeTabId = parseInt(lsGet(KEY_ACTIVE) || '0', 10) || tabs[0].id;
+if(!tabs.some(function(t){return t.id === activeTabId;})) activeTabId = tabs[0].id;
+var tabCounter = 1;
+tabs.forEach(function(t){ if(t.id >= tabCounter) tabCounter = t.id + 1; });
+
+function findTab(id){
+  for(var i=0;i<tabs.length;i++) if(tabs[i].id === id) return tabs[i];
+  return null;
+}
+
+function saveTabsData(){
+  try{
+    lsSet(KEY_TABS, JSON.stringify(tabs));
+    lsSet(KEY_ACTIVE, String(activeTabId));
+  }catch(e){}
+}
+
+function renderTabs(){
+  var html = '';
+  var onlyOne = tabs.length <= 1;
+  for(var i=0;i<tabs.length;i++){
+    if(i>0) html += ' ';
+    var t = tabs[i];
+    var isActive = t.id === activeTabId;
+    var cls = isActive ? 'tab tab-active' : 'tab tab-inactive';
+    var dn = t.name.length > 16 ? t.name.substring(0,14) + '..' : t.name;
+    html += '<span class="' + cls + '" data-tab-id="' + t.id + '">';
+    if(onlyOne){
+      html += '<span class="tb-name" data-action="name">[' + escHtml(dn) + ']</span>';
+    } else {
+      html += '<span class="tb-name" data-action="name">[' + escHtml(dn) + '</span>';
+      html += '<span class="tb-close" data-action="close">\u00d7]</span>';
+    }
+    html += '</span>';
+  }
+  if(tabs.length > 0) html += ' ';
+  html += '<span class="tb-add" data-action="add">[+]</span>';
+  tabsEl.innerHTML = html;
+}
 
 function applyWrap(){
   if(wrapMode){ ta.classList.add('wrap'); wrapBtn.textContent='[wrap+]'; }
@@ -122,6 +200,11 @@ function updateStats(){
   statsEl.textContent='c:'+c+' w:'+n+' l:'+l;
 }
 
+function saveCurrentContentToTab(){
+  var cur = findTab(activeTabId);
+  if(cur) cur.content = ta.value;
+}
+
 var saveTimer=null;
 function scheduleSave(){
   if(saveTimer) clearTimeout(saveTimer);
@@ -129,8 +212,91 @@ function scheduleSave(){
 }
 function flush(){
   if(saveTimer){ clearTimeout(saveTimer); saveTimer=null; }
-  lsSet(KEY_TEXT,ta.value);
+  saveCurrentContentToTab();
+  saveTabsData();
 }
+
+function setActiveTab(id){
+  if(id === activeTabId){
+    var t = findTab(id);
+    if(t) ta.value = t.content;
+    return;
+  }
+  saveCurrentContentToTab();
+  activeTabId = id;
+  var tab = findTab(id);
+  if(!tab) return;
+  ta.value = tab.content;
+  updateStats();
+  saveTabsData();
+  renderTabs();
+  ta.focus({preventScroll:true});
+}
+
+function addTab(){
+  saveCurrentContentToTab();
+  var newTab = {id: tabCounter++, name: DEF_NAME, content: ''};
+  tabs.push(newTab);
+  activeTabId = newTab.id;
+  ta.value = '';
+  updateStats();
+  saveTabsData();
+  renderTabs();
+  ta.focus({preventScroll:true});
+}
+
+function closeTab(id){
+  if(tabs.length <= 1) return;
+  var idx = -1;
+  for(var i=0;i<tabs.length;i++) if(tabs[i].id === id){ idx = i; break; }
+  if(idx < 0) return;
+  var wasActive = (id === activeTabId);
+  tabs.splice(idx, 1);
+  if(wasActive){
+    var newIdx = Math.min(idx, tabs.length - 1);
+    activeTabId = tabs[newIdx].id;
+    ta.value = tabs[newIdx].content;
+    updateStats();
+  }
+  saveTabsData();
+  renderTabs();
+  if(wasActive) ta.focus({preventScroll:true});
+}
+
+function renameTab(id){
+  var tab = findTab(id);
+  if(!tab) return;
+  var input = null;
+  try{ input = window.prompt('Rename tab:', tab.name); }catch(e){}
+  if(input === null) return;
+  input = String(input).trim();
+  if(!input) return;
+  tab.name = input;
+  saveTabsData();
+  renderTabs();
+}
+
+tabsEl.addEventListener('click', function(e){
+  var el = e.target.closest ? e.target.closest('[data-action]') : null;
+  if(!el) return;
+  var action = el.getAttribute('data-action');
+  if(action === 'add'){
+    e.preventDefault();
+    addTab();
+    return;
+  }
+  var tabEl = el.closest('[data-tab-id]');
+  if(!tabEl) return;
+  var id = parseInt(tabEl.getAttribute('data-tab-id'), 10);
+  if(isNaN(id)) return;
+  e.preventDefault();
+  if(action === 'close'){
+    closeTab(id);
+  } else if(action === 'name'){
+    if(id === activeTabId) renameTab(id);
+    else setActiveTab(id);
+  }
+});
 
 function getLineHeight(){
   var lh = parseFloat(getComputedStyle(ta).lineHeight);
@@ -188,14 +354,18 @@ var MIME={html:'text/html',htm:'text/html',txt:'text/plain',log:'text/plain',
 
 function saveAs(){
   flush();
-  var def = lsGet(KEY_NAME) || DEF_NAME;
+  var cur = findTab(activeTabId);
+  if(!cur) return;
+  var def = cur.name || DEF_NAME;
   var input = null;
   try{ input = window.prompt('Save file as (filename with extension):', def); }
   catch(e){ input = def; }
   if(input===null) return;
   var fn = (input||'').trim() || def;
   if(!/\.[a-z0-9]+$/i.test(fn)) fn += '.html';
-  lsSet(KEY_NAME,fn);
+  cur.name = fn;
+  saveTabsData();
+  renderTabs();
 
   var ext = fn.split('.').pop().toLowerCase();
   var body = (ext==='html'||ext==='htm') ? wrapHtml(fn, ta.value) : ta.value;
@@ -375,11 +545,15 @@ fileEl.addEventListener('change', function(){
       var m=t.match(/<pre id="n">([\s\S]*?)<\/pre>/i);
       if(m) t=unesc(m[1]);
     }
-    if(ta.value.trim() && ta.value!==t && !confirm('Replace current text with file content?')) return;
-    ta.value=t;
+    saveCurrentContentToTab();
+    var newTab = {id: tabCounter++, name: f.name, content: t};
+    tabs.push(newTab);
+    activeTabId = newTab.id;
+    ta.value = t;
     ta.setSelectionRange(t.length, t.length);
     updateStats();
-    scheduleSave();
+    saveTabsData();
+    renderTabs();
     ta.focus({preventScroll:true});
   };
   rd.readAsText(f);
@@ -430,7 +604,10 @@ try{
 }catch(e){}
 
 applyWrap();
+var initialTab = findTab(activeTabId);
+ta.value = initialTab ? initialTab.content : '';
 updateStats();
+renderTabs();
 
 if(document.fonts && document.fonts.ready){
   document.fonts.ready.then(function(){ updateStats(); });
