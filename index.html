@@ -131,7 +131,7 @@ body{
   border-right:1px solid #3a3a3a;
   margin-right:5px;
 }
-.btn-group:last-child{
+.btn-group.last-visible{
   border-right:none;
   padding-right:0;
   margin-right:0;
@@ -166,6 +166,12 @@ body{
   padding-top:1px;
   padding-left:13px;
 }
+.btn.warn-state{
+  color:#a08000;
+}
+.btn.warn-state .ico{
+  opacity:0.55;
+}
 .btn .ico{
   width:18px;
   height:18px;
@@ -197,6 +203,14 @@ body{
 .sync-btn.ok{ color:var(--green); }
 .sync-btn.err{ color:var(--red); }
 .sync-btn.local{ color:#808080; }
+.sync-btn.loading{
+  color:var(--yellow);
+  animation: blink-loading 0.9s ease-in-out infinite;
+}
+@keyframes blink-loading{
+  0%, 100%{ opacity:1; }
+  50%{ opacity:0.35; }
+}
 @keyframes pulse-warn{
   0%, 100%{ outline:0 solid var(--yellow); outline-offset:0; }
   50%{ outline:3px solid var(--yellow); outline-offset:2px; }
@@ -216,6 +230,17 @@ body{
   white-space:pre;
   overflow:hidden;
   margin-bottom:7px;
+}
+.ro-badge{
+  display:inline-block;
+  color:var(--yellow);
+  border:1px solid var(--yellow);
+  padding:0 5px;
+  font-size:0.82em;
+  font-weight:bold;
+  letter-spacing:0.5px;
+  border-radius:2px;
+  vertical-align:middle;
 }
 #ta{
   flex:1 1 auto;
@@ -250,9 +275,12 @@ body{
   word-break:break-word;
 }
 #ta[readonly]{
-  background:#1a1a1a;
-  color:#888;
+  background:#141414;
+  color:#e0e0e0;
   caret-color:transparent;
+}
+body.readonly-view .edit-only{
+  display:none !important;
 }
 .modal-overlay{
   position:fixed;
@@ -338,6 +366,10 @@ body{
 .status-row .smiley.ok{ color:var(--green); }
 .status-row .smiley.err{ color:var(--red); }
 .status-row .smiley.local{ color:#808080; }
+.status-row .smiley.loading{
+  color:var(--yellow);
+  animation: blink-loading 0.9s ease-in-out infinite;
+}
 .field-row{
   display:flex;
   gap:9px;
@@ -483,7 +515,7 @@ legend{
 <div class="tabs-row" id="tabs"></div>
 
 <div class="toolbar" id="toolbar">
-  <div class="btn-group">
+  <div class="btn-group edit-only">
     <button class="btn always-label" data-act="save" title="Save As">
       <svg class="ico" aria-hidden="true"><use href="#i-save"/></svg>
       <span>Save As</span>
@@ -493,7 +525,7 @@ legend{
       <span>Open</span>
     </button>
   </div>
-  <div class="btn-group">
+  <div class="btn-group edit-only">
     <button class="btn" data-act="tab" title="Indent">
       <svg class="ico" aria-hidden="true"><use href="#i-tab"/></svg>
       <span>Tab</span>
@@ -520,7 +552,7 @@ legend{
     </button>
   </div>
   <div class="btn-group">
-    <button class="btn" data-act="cut" title="Cut">
+    <button class="btn edit-only" data-act="cut" title="Cut">
       <svg class="ico" aria-hidden="true"><use href="#i-cut"/></svg>
       <span>Cut</span>
     </button>
@@ -528,7 +560,7 @@ legend{
       <svg class="ico" aria-hidden="true"><use href="#i-copy"/></svg>
       <span>Copy</span>
     </button>
-    <button class="btn" data-act="paste" title="Paste">
+    <button class="btn edit-only" data-act="paste" title="Paste">
       <svg class="ico" aria-hidden="true"><use href="#i-paste"/></svg>
       <span>Paste</span>
     </button>
@@ -538,7 +570,7 @@ legend{
     </button>
   </div>
   <div class="btn-group">
-    <div class="mode-toggle">
+    <div class="mode-toggle edit-only">
       <button class="btn mode-btn pressed" data-mode="edit" id="modeEdit" title="Edit mode">Edit</button>
       <button class="btn mode-btn" data-mode="read" id="modeRead" title="Read mode">Read</button>
     </div>
@@ -546,7 +578,7 @@ legend{
       <svg class="ico" aria-hidden="true"><use href="#i-link"/></svg>
       <span>Link</span>
     </button>
-    <button class="btn sync-btn local" data-act="sync-open" id="syncBtn" title="JSONBin sync">:|</button>
+    <button class="btn sync-btn local edit-only" data-act="sync-open" id="syncBtn" title="JSONBin sync">:|</button>
   </div>
 </div>
 
@@ -710,15 +742,17 @@ function renderTabs(){
     var t = tabs[i];
     var isActive = t.id === activeTabId;
     var dn = t.name.length > 20 ? t.name.substring(0,18) + '..' : t.name;
-    var title = isActive ? 'Click to rename' : 'Click to switch';
+    var title = isActive ? (isReadOnlyView ? 'Active tab' : 'Click to rename') : 'Click to switch';
     html += '<span class="tab ' + (isActive ? 'active' : 'inactive') + '" data-tab-id="' + t.id + '" title="' + title + '">';
     html += '<span class="tb-name" data-action="name">' + escHtml(dn) + '</span>';
-    if(multi){
+    if(multi && !isReadOnlyView){
       html += '<span class="tb-close" data-action="close" title="Close tab">&#215;</span>';
     }
     html += '</span>';
   }
-  html += '<span class="tab-add" data-action="add" title="New tab">+</span>';
+  if(!isReadOnlyView){
+    html += '<span class="tab-add" data-action="add" title="New tab">+</span>';
+  }
   tabsEl.innerHTML = html;
 }
 
@@ -737,9 +771,22 @@ function applyWrap(){
 function applyReadOnlyMode(){
   if(isReadOnlyView){
     ta.setAttribute('readonly','');
+    document.body.classList.add('readonly-view');
   } else {
     ta.removeAttribute('readonly');
+    document.body.classList.remove('readonly-view');
   }
+  updateGroupSeparators();
+}
+
+function updateGroupSeparators(){
+  var groups = toolbar.querySelectorAll('.btn-group');
+  var lastVisible = null;
+  for(var i=0;i<groups.length;i++){
+    groups[i].classList.remove('last-visible');
+    if(groups[i].offsetParent !== null) lastVisible = groups[i];
+  }
+  if(lastVisible) lastVisible.classList.add('last-visible');
 }
 
 function updateStats(){
@@ -747,7 +794,8 @@ function updateStats(){
   var c = v.length;
   var n = v.replace(/\s/g,'').length;
   var l = v === '' ? 0 : v.split('\n').length;
-  statsEl.textContent = 'c:' + c + '  w:' + n + '  l:' + l;
+  var prefix = isReadOnlyView ? '<span class="ro-badge">READ ONLY</span> ' : '';
+  statsEl.innerHTML = prefix + 'c:' + c + '  w:' + n + '  l:' + l;
 }
 
 var saveTimer = null;
@@ -781,6 +829,7 @@ function setActiveTab(id){
 }
 
 function addTab(){
+  if(isReadOnlyView) return;
   saveCurrentContentToTab();
   var newTab = {id: tabCounter++, name: DEF_NAME, content: ''};
   tabs.push(newTab);
@@ -794,6 +843,7 @@ function addTab(){
 }
 
 function closeTab(id){
+  if(isReadOnlyView) return;
   if(tabs.length <= 1) return;
   var idx = -1;
   for(var i=0;i<tabs.length;i++) if(tabs[i].id === id){ idx = i; break; }
@@ -813,6 +863,7 @@ function closeTab(id){
 }
 
 function renameTab(id){
+  if(isReadOnlyView) return;
   var tab = findTab(id);
   if(!tab) return;
   var input = null;
@@ -836,6 +887,7 @@ tabsEl.addEventListener('click', function(e){
   e.preventDefault();
   if(e.target.closest('[data-action="close"]')){ closeTab(id); return; }
   if(id !== activeTabId){ setActiveTab(id); return; }
+  if(isReadOnlyView) return;
   renameTab(id);
 });
 
@@ -868,6 +920,7 @@ function doCopy(){
 }
 
 function doCut(){
+  if(isReadOnlyView) return;
   var s = ta.selectionStart, e = ta.selectionEnd;
   if(s === e) return;
   doCopy();
@@ -955,7 +1008,8 @@ function copyShareLink(){
 }
 
 function showTransientMessage(msg){
-  statsEl.textContent = msg;
+  var prefix = isReadOnlyView ? '<span class="ro-badge">READ ONLY</span> ' : '';
+  statsEl.innerHTML = prefix + msg;
   setTimeout(updateStats, 1600);
 }
 
@@ -974,6 +1028,7 @@ function tryLoadSharedContent(){
     ta.value = newTab.content;
     setShareMode(payload.mode === 'read' ? 'read' : 'edit');
     saveTabsData();
+    applyReadOnlyMode();
     renderTabs();
     updateStats();
     return true;
@@ -988,6 +1043,7 @@ function updateShareLinkState(){
 
 function computeSyncIcon(){
   if(!binId || !binKey) return { icon: ':|', cls: 'local', text: 'Local only \u2014 credentials not set' };
+  if(syncState === 'loading') return { icon: ':|', cls: 'loading', text: 'Syncing\u2026' };
   if(syncState === 'ok') return { icon: ':)', cls: 'ok', text: 'Synced with JSONBin' };
   return { icon: ':(', cls: 'err', text: 'Connected but sync failed' };
 }
@@ -995,7 +1051,7 @@ function computeSyncIcon(){
 function renderSyncStatus(){
   var s = computeSyncIcon();
   syncBtn.textContent = s.icon;
-  syncBtn.className = 'btn sync-btn ' + s.cls;
+  syncBtn.className = 'btn sync-btn edit-only ' + s.cls;
   if(modalSmiley){
     modalSmiley.textContent = s.icon;
     modalSmiley.className = 'smiley ' + s.cls;
@@ -1023,6 +1079,9 @@ function doSync(){
   if(isReadOnlyView) return;
   saveCurrentContentToTab();
   saveTabsData();
+
+  syncState = 'loading';
+  renderSyncStatus();
 
   var payload = {
     v: 1,
@@ -1068,6 +1127,8 @@ function doSync(){
 
 function pullFromBin(){
   if(!binId || !binKey) return;
+  syncState = 'loading';
+  renderSyncStatus();
   var url = JSONBIN_BASE + '/b/' + encodeURIComponent(binId) + '/latest';
   fetch(url, { headers: { 'X-Master-Key': binKey } })
     .then(function(res){
@@ -1109,8 +1170,8 @@ function closeSyncModal(){
   binKey = binKeyEl.value.trim();
   lsSet(KEY_BIN_ID, binId);
   lsSet(KEY_BIN_KEY, binKey);
-  if(binId && binKey && syncState === 'local') syncState = 'err';
   if(!binId || !binKey) syncState = 'local';
+  else if(syncState === 'local') syncState = 'err';
   renderSyncStatus();
   syncModal.hidden = true;
 }
@@ -1125,8 +1186,6 @@ modalSyncBtn.addEventListener('click', function(){
   binKey = binKeyEl.value.trim();
   lsSet(KEY_BIN_ID, binId);
   lsSet(KEY_BIN_KEY, binKey);
-  syncState = 'err';
-  renderSyncStatus();
   doSync();
 });
 
@@ -1160,6 +1219,7 @@ function wrapHtml(name,text){
 }
 
 function saveAs(){
+  if(isReadOnlyView) return;
   flush();
   var cur = findTab(activeTabId);
   if(!cur) return;
@@ -1200,9 +1260,14 @@ function saveAs(){
   } catch(e){}
 }
 
-function openFile(){ fileEl.value = ''; fileEl.click(); }
+function openFile(){
+  if(isReadOnlyView) return;
+  fileEl.value = '';
+  fileEl.click();
+}
 
 function indent(wantUntab){
+  if(isReadOnlyView) return;
   ta.focus({preventScroll:true});
   var val    = ta.value;
   var selA   = Math.min(ta.selectionStart, ta.selectionEnd);
@@ -1317,6 +1382,7 @@ toolbar.addEventListener('click', function(e){
   var modeBtn = e.target.closest('[data-mode]');
   if(modeBtn){
     e.preventDefault();
+    if(isReadOnlyView) return;
     setShareMode(modeBtn.getAttribute('data-mode'));
     return;
   }
@@ -1338,6 +1404,19 @@ ta.addEventListener('keyup', updateStats);
 
 ta.addEventListener('keydown', function(e){
   var ctrl = e.ctrlKey || e.metaKey;
+
+  if(isReadOnlyView){
+    if(ctrl && (
+      e.key === 's' || e.key === 'S' ||
+      e.key === 'o' || e.key === 'O' ||
+      e.key === 'x' || e.key === 'X' ||
+      e.key === 'v' || e.key === 'V'
+    )){
+      e.preventDefault();
+      showTransientMessage('Read-only mode');
+    }
+    return;
+  }
 
   if(ctrl && !e.shiftKey && (e.key === 's' || e.key === 'S')){ e.preventDefault(); saveAs(); return; }
   if(ctrl && (e.key === 'o' || e.key === 'O')){ e.preventDefault(); openFile(); return; }
@@ -1387,6 +1466,7 @@ ta.addEventListener('keydown', function(e){
 });
 
 fileEl.addEventListener('change', function(){
+  if(isReadOnlyView){ fileEl.value = ''; return; }
   var f = fileEl.files && fileEl.files[0];
   if(!f) return;
   var rd = new FileReader();
@@ -1467,7 +1547,6 @@ try {
 applyWrap();
 setShareMode(shareMode);
 if(binId && binKey) syncState = 'err'; else syncState = 'local';
-renderSyncStatus();
 
 if(!tryLoadSharedContent()){
   var initialTab = findTab(activeTabId);
@@ -1477,6 +1556,7 @@ if(!tryLoadSharedContent()){
 applyReadOnlyMode();
 updateStats();
 renderTabs();
+renderSyncStatus();
 
 if(document.fonts && document.fonts.ready){
   document.fonts.ready.then(function(){ updateStats(); });
