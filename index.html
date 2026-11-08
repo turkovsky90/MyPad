@@ -8,8 +8,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="apple-mobile-web-app-title" content="notepad">
-<title>ascii notepad 2.0</title>
+<meta name="apple-mobile-web-app-title" content="MyPad">
+<title>MyPad</title>
 <link id="mf" rel="manifest">
 <style>
 :root{
@@ -621,7 +621,7 @@ legend{
           <li>Open the API Keys page and copy your X-Master-Key.</li>
           <li>Paste both values above and click Save &amp; Sync.</li>
         </ol>
-        <p class="note">If Bin ID is empty, a new private bin will be created automatically using your key.</p>
+        <p class="note">If Bin ID is empty, a new private bin will be created automatically using your key. Auto-sync runs on every launch.</p>
       </fieldset>
 
       <div class="modal-actions">
@@ -1045,7 +1045,8 @@ function computeSyncIcon(){
   if(!binId || !binKey) return { icon: ':|', cls: 'local', text: 'Local only \u2014 credentials not set' };
   if(syncState === 'loading') return { icon: ':|', cls: 'loading', text: 'Syncing\u2026' };
   if(syncState === 'ok') return { icon: ':)', cls: 'ok', text: 'Synced with JSONBin' };
-  return { icon: ':(', cls: 'err', text: 'Connected but sync failed' };
+  if(syncState === 'err') return { icon: ':(', cls: 'err', text: 'Connected but sync failed' };
+  return { icon: ':|', cls: 'local', text: 'Ready \u2014 press Save & Sync' };
 }
 
 function renderSyncStatus(){
@@ -1075,8 +1076,8 @@ function scheduleSync(){
 }
 
 function doSync(){
-  if(!binId || !binKey){ renderSyncStatus(); return; }
-  if(isReadOnlyView) return;
+  if(!binId || !binKey){ renderSyncStatus(); return Promise.resolve(false); }
+  if(isReadOnlyView) return Promise.resolve(false);
   saveCurrentContentToTab();
   saveTabsData();
 
@@ -1099,12 +1100,12 @@ function doSync(){
   };
   if(isNew){
     headers['X-Bin-Private'] = 'true';
-    headers['X-Bin-Name'] = 'ascii-notepad';
+    headers['X-Bin-Name'] = 'mypad';
   } else {
     headers['X-Bin-Versioning'] = 'false';
   }
 
-  fetch(url, { method: method, headers: headers, body: JSON.stringify(payload) })
+  return fetch(url, { method: method, headers: headers, body: JSON.stringify(payload) })
     .then(function(res){
       if(!res.ok) throw new Error('HTTP ' + res.status);
       return res.json().catch(function(){ return null; });
@@ -1118,19 +1119,21 @@ function doSync(){
       syncState = 'ok';
       lastSyncedHash = hashTabs();
       renderSyncStatus();
+      return true;
     })
     .catch(function(){
       syncState = 'err';
       renderSyncStatus();
+      return false;
     });
 }
 
 function pullFromBin(){
-  if(!binId || !binKey) return;
+  if(!binId || !binKey) return Promise.resolve(false);
   syncState = 'loading';
   renderSyncStatus();
   var url = JSONBIN_BASE + '/b/' + encodeURIComponent(binId) + '/latest';
-  fetch(url, { headers: { 'X-Master-Key': binKey } })
+  return fetch(url, { headers: { 'X-Master-Key': binKey } })
     .then(function(res){
       if(!res.ok) throw new Error('HTTP ' + res.status);
       return res.json();
@@ -1151,10 +1154,12 @@ function pullFromBin(){
       syncState = 'ok';
       lastSyncedHash = hashTabs();
       renderSyncStatus();
+      return true;
     })
     .catch(function(){
       syncState = 'err';
       renderSyncStatus();
+      return false;
     });
 }
 
@@ -1170,8 +1175,11 @@ function closeSyncModal(){
   binKey = binKeyEl.value.trim();
   lsSet(KEY_BIN_ID, binId);
   lsSet(KEY_BIN_KEY, binKey);
-  if(!binId || !binKey) syncState = 'local';
-  else if(syncState === 'local') syncState = 'err';
+  if(!binId || !binKey){
+    syncState = 'local';
+  } else if(syncState === 'local'){
+    syncState = 'idle';
+  }
   renderSyncStatus();
   syncModal.hidden = true;
 }
@@ -1514,9 +1522,9 @@ try {
   var base = location.href.split('#')[0].split('?')[0];
   var scope = base.replace(/[^/]*$/, '');
   var manifest = {
-    name: 'ascii notepad 2.0',
-    short_name: 'notepad2',
-    description: 'Dark ASCII notepad with JSONBin sync',
+    name: 'MyPad',
+    short_name: 'MyPad',
+    description: 'MyPad \u2014 dark notepad with JSONBin sync',
     start_url: base,
     scope: scope,
     display: 'standalone',
@@ -1546,9 +1554,17 @@ try {
 
 applyWrap();
 setShareMode(shareMode);
-if(binId && binKey) syncState = 'err'; else syncState = 'local';
 
-if(!tryLoadSharedContent()){
+var hasCreds = !!(binId && binKey);
+var freshInstall = !lsGet(KEY_TABS) && !lsGet('asciinote.text');
+
+if(hasCreds) syncState = 'loading';
+else syncState = 'local';
+
+var shareLoaded = false;
+if(tryLoadSharedContent()){
+  shareLoaded = true;
+} else {
   var initialTab = findTab(activeTabId);
   ta.value = initialTab ? initialTab.content : '';
 }
@@ -1557,6 +1573,19 @@ applyReadOnlyMode();
 updateStats();
 renderTabs();
 renderSyncStatus();
+
+if(hasCreds && !isReadOnlyView && !shareLoaded){
+  if(freshInstall){
+    pullFromBin().then(function(ok){
+      if(!ok) doSync();
+    });
+  } else {
+    doSync();
+  }
+} else if(hasCreds && syncState === 'loading'){
+  syncState = 'idle';
+  renderSyncStatus();
+}
 
 if(document.fonts && document.fonts.ready){
   document.fonts.ready.then(function(){ updateStats(); });
