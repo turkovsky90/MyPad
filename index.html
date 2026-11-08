@@ -136,9 +136,16 @@ body{
   padding-right:0;
   margin-right:0;
 }
+.btn-group.push-right{
+  margin-left:auto;
+  border-right:none;
+  padding-right:0;
+  margin-right:0;
+}
 .btn{
   display:inline-flex;
   align-items:center;
+  justify-content:center;
   gap:7px;
   padding:0 12px;
   min-height:39px;
@@ -146,7 +153,7 @@ body{
   font-size:var(--fs-btn);
   color:var(--text);
   background:var(--face);
-  border:none;
+  border:3px solid transparent;
   cursor:default;
   user-select:none;
   -webkit-user-select:none;
@@ -163,8 +170,6 @@ body{
     inset -1px -1px #5a5a5a,
     inset 2px 2px #1a1a1a,
     inset -2px -2px #454545;
-  padding-top:1px;
-  padding-left:13px;
 }
 .btn.warn-state{
   color:#a08000;
@@ -448,9 +453,8 @@ legend{
   .btn:not(.always-label) .ico + span { display: none; }
   .btn .ico { width:20px; height:20px; }
   .btn { padding: 0 10px; }
-  .btn.pressed { padding-top:1px; padding-left:11px; }
   .mode-btn { padding: 0 10px; }
-  .mode-btn.pressed { padding-top:1px; padding-left:11px; }
+  .btn-group.push-right { margin-left:0; }
 }
 </style>
 </head>
@@ -552,6 +556,10 @@ legend{
     </button>
   </div>
   <div class="btn-group">
+    <button class="btn always-label" data-act="all" title="Select All">
+      <svg class="ico" aria-hidden="true"><use href="#i-all"/></svg>
+      <span>Select All</span>
+    </button>
     <button class="btn edit-only" data-act="cut" title="Cut">
       <svg class="ico" aria-hidden="true"><use href="#i-cut"/></svg>
       <span>Cut</span>
@@ -564,12 +572,8 @@ legend{
       <svg class="ico" aria-hidden="true"><use href="#i-paste"/></svg>
       <span>Paste</span>
     </button>
-    <button class="btn always-label" data-act="all" title="Select All">
-      <svg class="ico" aria-hidden="true"><use href="#i-all"/></svg>
-      <span>Select All</span>
-    </button>
   </div>
-  <div class="btn-group">
+  <div class="btn-group push-right">
     <div class="mode-toggle edit-only">
       <button class="btn mode-btn pressed" data-mode="edit" id="modeEdit" title="Edit mode">Edit</button>
       <button class="btn mode-btn" data-mode="read" id="modeRead" title="Read mode">Read</button>
