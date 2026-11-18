@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="color-scheme" content="dark">
-<meta name="theme-color" content="#161616">
+<meta name="theme-color" content="#2e2e2e">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
@@ -13,15 +13,21 @@
 <link id="mf" rel="manifest">
 <style>
 :root{
-  --bg:#161616;
-  --face:#2e2e2e;
-  --text:#d8d8d8;
+  --bg:#2e2e2e;
+  --tabs-bg:#232323;
+  --surface:#262626;
+  --pill:#3f3f3f;
+  --pill-hi:#4a4a4a;
+  --text:#e0e0e0;
+  --muted:#9a9a9a;
   --green:#7ee787;
-  --red:#ff7b72;
-  --blue:#79c0ff;
+  --green-fill:#4d8051;
+  --green-on:#d9f5dc;
   --yellow:#e3b341;
+  --red:#ff7b72;
+  --line:#454545;
   --fs-body:23px;
-  --fs-btn:16px;
+  --fs-btn:17px;
   --fs-small:15px;
   --fs-tab:16px;
 }
@@ -29,7 +35,7 @@
   :root{ --fs-body:18px; --fs-btn:15px; --fs-small:14px; --fs-tab:15px; }
 }
 @media (min-width:601px) and (max-width:1000px){
-  :root{ --fs-body:21px; --fs-btn:15px; --fs-small:14px; --fs-tab:15px; }
+  :root{ --fs-body:21px; --fs-btn:16px; --fs-small:14px; --fs-tab:15px; }
 }
 *{box-sizing:border-box}
 html,body{height:100%;margin:0;overflow:hidden;overscroll-behavior:none}
@@ -37,53 +43,48 @@ body{
   display:flex;flex-direction:column;
   background:var(--bg);
   color:var(--text);
-  font-family:"MS Sans Serif",Tahoma,"Pixelated MS Sans Serif",sans-serif;
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
   font-size:var(--fs-body);
   padding:0;
   gap:0;
 }
+
+/* ===== панель вкладок (отдельный слой) ===== */
 .tabs-row{
   display:flex;
   flex-wrap:wrap;
-  gap:0;
-  align-items:flex-end;
+  gap:8px;
+  align-items:center;
   flex-shrink:0;
-  padding:9px 9px 0;
+  padding:10px 12px 12px;
   margin-bottom:0;
+  background:var(--tabs-bg);
+  border-bottom:1px solid var(--line);
 }
 .tab{
   display:inline-flex;
   align-items:center;
-  gap:7px;
-  padding:6px 14px 8px;
-  background:#1e1e1e;
-  color:#6a6a6a;
+  gap:8px;
+  padding:8px 16px;
+  background:transparent;
+  border:1px solid var(--line);
+  color:var(--muted);
   font-family:inherit;
   font-size:var(--fs-tab);
   line-height:1.15;
+  border-radius:999px;
   cursor:default;
   user-select:none;
   -webkit-user-select:none;
   -webkit-tap-highlight-color:transparent;
-  margin-right:2px;
   flex-shrink:0;
-  max-width:240px;
-  box-shadow:
-    inset -1px 0 #0a0a0a,
-    inset 1px 0 #3a3a3a,
-    inset 0 1px #3a3a3a,
-    inset 0 -1px #0a0a0a;
+  max-width:260px;
+  transition:background .15s,color .15s;
 }
 .tab.active{
-  background:#2e2e2e;
-  color:#e8e8e8;
-  padding:9px 14px 12px;
-  line-height:1.15;
-  box-shadow:
-    inset -1px 0 #0a0a0a,
-    inset 1px 0 #6a6a6a,
-    inset 0 1px #6a6a6a,
-    inset 0 -1px #0a0a0a;
+  background:var(--pill-hi);
+  border-color:transparent;
+  color:var(--text);
 }
 .tab .tb-name{
   overflow:hidden;
@@ -92,8 +93,8 @@ body{
   line-height:1;
 }
 .tab .tb-close{
-  font-size:0.9em;
-  padding:0 4px;
+  font-size:1.05em;
+  padding:0 2px 0 4px;
   color:inherit;
   cursor:default;
   line-height:1;
@@ -103,137 +104,121 @@ body{
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  padding:6px 14px 8px;
-  min-width:37px;
-  background:#1e1e1e;
-  color:var(--text);
+  width:38px;
+  height:38px;
+  background:transparent;
+  border:1.5px dashed var(--muted);
+  border-radius:50%;
+  color:var(--muted);
   font-family:inherit;
-  font-size:var(--fs-tab);
-  line-height:1.15;
+  font-size:20px;
+  line-height:1;
   cursor:default;
   user-select:none;
   -webkit-user-select:none;
   -webkit-tap-highlight-color:transparent;
-  box-shadow:
-    inset -1px 0 #0a0a0a,
-    inset 1px 0 #3a3a3a,
-    inset 0 1px #3a3a3a,
-    inset 0 -1px #0a0a0a;
+  flex-shrink:0;
 }
 .tab.tab-run .tb-name{ color:var(--green); }
 .tab.tab-run.active .tb-name{ color:var(--green); }
 
+/* ===== тулбар ===== */
 .toolbar{
   display:flex;
   flex-wrap:wrap;
-  gap:5px;
+  gap:8px;
   align-items:center;
   flex-shrink:0;
-  padding:6px 10px;
+  padding:10px 12px;
   margin:0;
-  background:var(--face);
-  box-shadow:
-    inset 1px 1px #454545,
-    inset -1px -1px #1a1a1a;
+  background:var(--bg);
 }
 .btn-group{
   display:inline-flex;
-  gap:4px;
+  gap:8px;
   align-items:center;
-  padding-right:11px;
-  border-right:1px solid #3a3a3a;
-  margin-right:5px;
+  padding-right:12px;
+  border-right:1px solid var(--line);
 }
 .btn-group.last-visible{
   border-right:none;
   padding-right:0;
-  margin-right:0;
 }
 .btn-group.push-right{
   margin-left:auto;
   border-right:none;
   padding-right:0;
-  margin-right:0;
 }
 .btn{
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  gap:7px;
-  padding:0 12px;
-  min-height:39px;
+  gap:8px;
+  padding:0 18px;
+  min-height:48px;
   font-family:inherit;
   font-size:var(--fs-btn);
   color:var(--text);
-  background:var(--face);
+  background:var(--pill);
   border:none;
+  border-radius:999px;
   cursor:default;
   user-select:none;
   -webkit-user-select:none;
   -webkit-tap-highlight-color:transparent;
-  box-shadow:
-    inset -1px -1px #0a0a0a,
-    inset 1px 1px #5a5a5a,
-    inset -2px -2px #1a1a1a,
-    inset 2px 2px #454545;
+  transition:transform .14s cubic-bezier(.34,1.56,.64,1),background .15s,color .15s;
 }
 .btn:active{
-  box-shadow:
-    inset 1px 1px #0a0a0a,
-    inset -1px -1px #5a5a5a,
-    inset 2px 2px #1a1a1a,
-    inset -2px -2px #454545;
-  transform:translate(1px,1px);
+  transform:scale(.92);
 }
 .btn.pressed{
-  box-shadow:
-    inset 1px 1px #0a0a0a,
-    inset -1px -1px #5a5a5a,
-    inset 2px 2px #1a1a1a,
-    inset -2px -2px #454545;
+  background:var(--green-fill);
+  color:var(--green-on);
 }
 .btn[disabled]{
-  color:#5a5a5a;
+  opacity:.45;
   pointer-events:none;
 }
-.btn[disabled] .ico{ opacity:0.35; }
+.btn[disabled] .ico{ opacity:.5; }
 .btn.warn-state{
-  color:#a08000;
-}
-.btn.warn-state .ico{
-  opacity:0.55;
+  color:var(--yellow);
 }
 .btn .ico{
-  width:18px;
-  height:18px;
+  width:22px;
+  height:22px;
   flex-shrink:0;
   display:block;
 }
 .mode-toggle{
   display:inline-flex;
+  align-items:center;
+  gap:2px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  padding:3px;
 }
 .mode-btn{
-  min-height:34px;
-  padding:0 12px;
-  font-size:var(--fs-btn);
-  color:#909090;
-  font-weight:bold;
+  background:transparent;
+  color:var(--muted);
+  font-weight:600;
+  min-height:40px;
 }
 .mode-btn.pressed{
-  color:var(--green);
+  background:var(--green-fill);
+  color:var(--green-on);
 }
 .sync-btn{
-  min-width:60px;
-  min-height:39px;
-  font-size:20px;
-  font-weight:bold;
-  padding:0 9px;
+  min-width:48px;
+  min-height:48px;
+  padding:0 12px;
+  font-size:19px;
+  font-weight:700;
   justify-content:center;
-  color:#808080;
+  color:var(--muted);
 }
 .sync-btn.ok{ color:var(--green); }
 .sync-btn.err{ color:var(--red); }
-.sync-btn.local{ color:#808080; }
+.sync-btn.local{ color:var(--muted); }
 .sync-btn.loading{
   color:var(--yellow);
   animation: blink-loading 0.9s ease-in-out infinite;
@@ -249,15 +234,14 @@ body{
 .btn.pulse-warn{
   animation: pulse-warn 0.55s ease-in-out 2;
 }
+
+/* ===== статус-строка ===== */
 #stats{
   flex-shrink:0;
-  padding:5px 9px;
+  padding:6px 14px;
   font-size:var(--fs-small);
-  color:#888;
-  background:#1e1e1e;
-  box-shadow:
-    inset 1px 1px #0a0a0a,
-    inset -1px -1px #3a3a3a;
+  color:var(--muted);
+  background:var(--bg);
   white-space:pre;
   overflow:hidden;
   margin:0;
@@ -266,13 +250,15 @@ body{
   display:inline-block;
   color:var(--yellow);
   border:1px solid var(--yellow);
-  padding:0 5px;
+  padding:0 6px;
   font-size:0.82em;
   font-weight:bold;
   letter-spacing:0.5px;
-  border-radius:2px;
+  border-radius:4px;
   vertical-align:middle;
 }
+
+/* ===== редактор: от края до края, без скруглений и паддингов ===== */
 #ta{
   flex:1 1 auto;
   width:100%;
@@ -280,10 +266,10 @@ body{
   resize:none;
   border:none;
   outline:0;
-  padding:9px;
+  padding:0;
   margin:0;
-  background:#121212;
-  color:#e0e0e0;
+  background:var(--surface);
+  color:#e4e4e4;
   font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"DejaVu Sans Mono","Liberation Mono",monospace;
   font-size:var(--fs-body);
   line-height:1.5;
@@ -294,11 +280,6 @@ body{
   caret-color:var(--green);
   user-select:text;
   -webkit-user-select:text;
-  box-shadow:
-    inset 1px 1px #000,
-    inset -1px -1px #4a4a4a,
-    inset 2px 2px #000,
-    inset -2px -2px #2a2a2a;
 }
 #ta.wrap{
   white-space:pre-wrap;
@@ -306,72 +287,67 @@ body{
   word-break:break-word;
 }
 #ta[readonly]{
-  background:#141414;
-  color:#e0e0e0;
+  color:#e4e4e4;
   caret-color:transparent;
 }
 body.readonly-view .edit-only{
   display:none !important;
 }
+
+/* ===== модальный диалог ===== */
 .modal-overlay{
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,0.65);
+  background:rgba(0,0,0,0.6);
   display:flex;
   align-items:center;
   justify-content:center;
   z-index:1000;
-  padding:12px;
+  padding:16px;
 }
 .modal-overlay[hidden]{ display:none; }
 .modal-window{
-  width:min(650px,100%);
-  max-height:calc(100vh - 24px);
-  background:var(--face);
+  width:min(560px,100%);
+  max-height:calc(100vh - 32px);
+  background:var(--surface);
+  border-radius:28px;
   display:flex;
   flex-direction:column;
-  padding:3px;
-  box-shadow:
-    inset -1px -1px #0a0a0a,
-    inset 1px 1px #6a6a6a,
-    inset -2px -2px #1a1a1a,
-    inset 2px 2px #4a4a4a;
+  overflow:hidden;
+  animation:modal-in .28s cubic-bezier(.34,1.4,.64,1);
+}
+@keyframes modal-in{
+  from{ transform:scale(.92); opacity:0; }
+  to{ transform:scale(1); opacity:1; }
 }
 .modal-title{
-  background:linear-gradient(90deg,#1a2a5a,#3a5a9a);
-  color:#e8e8e8;
-  padding:5px 5px 5px 9px;
-  font-size:15px;
-  font-weight:bold;
+  color:var(--text);
+  padding:20px 20px 8px;
+  font-size:18px;
+  font-weight:600;
   display:flex;
   justify-content:space-between;
   align-items:center;
   flex-shrink:0;
 }
 .modal-close{
-  width:23px;
-  height:21px;
+  width:40px;
+  height:40px;
   padding:0;
-  font-size:14px;
+  font-size:20px;
   line-height:1;
   display:flex;
   align-items:center;
   justify-content:center;
-  background:var(--face);
-  color:var(--text);
+  background:transparent;
+  color:var(--muted);
   border:none;
+  border-radius:50%;
   cursor:default;
-  box-shadow:
-    inset -1px -1px #0a0a0a,
-    inset 1px 1px #6a6a6a;
 }
-.modal-close:active{
-  box-shadow:
-    inset 1px 1px #0a0a0a,
-    inset -1px -1px #6a6a6a;
-}
+.modal-close:active{ background:var(--pill); }
 .modal-body{
-  padding:14px;
+  padding:8px 20px 20px;
   display:flex;
   flex-direction:column;
   gap:14px;
@@ -383,20 +359,19 @@ body.readonly-view .edit-only{
   display:flex;
   align-items:center;
   gap:9px;
-  padding:7px 9px;
-  background:#1a1a1a;
-  box-shadow:
-    inset 1px 1px #000,
-    inset -1px -1px #4a4a4a;
+  padding:10px 14px;
+  background:rgba(255,255,255,0.04);
+  border:1px solid var(--line);
+  border-radius:14px;
 }
 .status-row .smiley{
-  font-size:1.5em;
+  font-size:1.4em;
   font-weight:bold;
   line-height:1;
 }
 .status-row .smiley.ok{ color:var(--green); }
 .status-row .smiley.err{ color:var(--red); }
-.status-row .smiley.local{ color:#808080; }
+.status-row .smiley.local{ color:var(--muted); }
 .status-row .smiley.loading{
   color:var(--yellow);
   animation: blink-loading 0.9s ease-in-out infinite;
@@ -416,21 +391,22 @@ body.readonly-view .edit-only{
   min-width:0;
   font-family:inherit;
   font-size:var(--fs-small);
-  background:#1a1a1a;
+  background:transparent;
   color:var(--text);
-  border:none;
+  border:1px solid var(--line);
+  border-radius:12px;
   outline:none;
-  padding:6px 7px;
-  min-height:32px;
-  box-shadow:
-    inset 1px 1px #000,
-    inset -1px -1px #5a5a5a,
-    inset 2px 2px #0a0a0a,
-    inset -2px -2px #3a3a3a;
+  padding:8px 12px;
+  min-height:40px;
+  transition:border-color .15s;
+}
+.field-row input:focus{
+  border-color:var(--green);
 }
 fieldset{
-  border:1px solid #5a5a5a;
-  padding:9px 14px 12px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:10px 14px 12px;
   margin:0;
 }
 legend{
@@ -444,27 +420,28 @@ legend{
 }
 .modal-body ol li{ margin-bottom:7px; }
 .modal-body code{
-  background:#1a1a1a;
-  padding:1px 5px;
+  background:rgba(0,0,0,0.35);
+  padding:2px 6px;
+  border-radius:6px;
   font-family:ui-monospace,monospace;
   font-size:0.9em;
   color:var(--green);
   word-break:break-all;
 }
 .modal-body a{
-  color:var(--blue);
+  color:var(--green);
 }
 .btn-copy-template{
   font-size:12px;
-  min-height:24px;
-  padding:1px 8px;
+  min-height:28px;
+  padding:2px 10px;
   margin-left:7px;
   vertical-align:middle;
 }
 .note{
   margin:9px 0 0;
   font-style:italic;
-  color:#9a9a9a;
+  color:var(--muted);
 }
 .modal-actions{
   display:flex;
@@ -473,16 +450,15 @@ legend{
   flex-wrap:wrap;
 }
 .modal-actions .btn{
-  min-height:34px;
+  min-height:44px;
 }
 @media (max-width:600px){
   .btn:not(.always-label) .ico + span { display: none; }
-  .btn .ico { width:20px; height:20px; }
-  .btn { padding: 0 10px; }
-  .mode-btn { padding: 0 10px; }
+  .btn { padding: 0 15px; min-height:48px; }
+  .btn .ico { width:22px; height:22px; }
+  .mode-btn { padding: 0 12px; }
   .btn-group.push-right { margin-left:0; }
-  .toolbar { padding: 4px 6px; }
-  .tabs-row { padding: 6px 6px 0; }
+  .toolbar { padding: 8px; }
 }
 
 /* === Run-режим === */
@@ -500,17 +476,14 @@ body.run-active #runPane{ display:flex; }
 
 .run-panel-toolbar{
   display:flex;
-  gap:5px;
+  gap:8px;
   align-items:center;
   flex-shrink:0;
-  padding:6px 10px;
+  padding:10px 12px;
   margin:0;
-  background:var(--face);
-  box-shadow:
-    inset 1px 1px #454545,
-    inset -1px -1px #1a1a1a;
-  padding-top: calc(6px + env(safe-area-inset-top, 0px));
-  border-bottom:1px solid #0a0a0a;
+  background:var(--bg);
+  padding-top: calc(10px + env(safe-area-inset-top, 0px));
+  border-bottom:1px solid var(--line);
 }
 .run-panel-toolbar .spacer{ flex:1 1 auto; }
 
@@ -523,7 +496,6 @@ body.run-active #runPane{ display:flex; }
   border:none;
   position:relative;
 }
-/* каждый iframe — на весь контейнер, показываем только активный */
 .run-frame-wrap iframe.run-frame{
   position:absolute;
   inset:0;
@@ -550,80 +522,85 @@ body.run-active #runPane{ display:flex; }
   height:100%;
 }
 @media (max-width:600px){
-  .run-panel-toolbar{ padding: 4px 6px; padding-top: calc(4px + env(safe-area-inset-top, 0px)); }
+  .run-panel-toolbar{ padding: 8px; padding-top: calc(8px + env(safe-area-inset-top, 0px)); }
 }
 </style>
 </head>
 <body>
 
 <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
-  <symbol id="i-save" viewBox="0 0 16 16">
-    <rect x="1" y="1" width="14" height="14" fill="#3a6aa8"/>
-    <rect x="4" y="2" width="8" height="5" fill="#c8c8c8"/>
-    <rect x="5" y="3" width="3" height="3" fill="#3a6aa8"/>
-    <rect x="9" y="3" width="2" height="3" fill="#1a1a1a"/>
-    <rect x="3" y="9" width="10" height="5" fill="#e8e8e8"/>
+  <symbol id="i-save" viewBox="0 0 24 24">
+    <path d="M17 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7l-4-4Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+    <path d="M8 3v5h6V3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+    <rect x="7" y="13" width="10" height="8" rx="1" fill="none" stroke="currentColor" stroke-width="1.7"/>
   </symbol>
-  <symbol id="i-open" viewBox="0 0 16 16">
-    <path d="M1 4 L6 4 L7 5 L15 5 L15 13 L1 13 Z" fill="#a87a20"/>
-    <path d="M1 6 L15 6 L15 13 L1 13 Z" fill="#e8c040"/>
+  <symbol id="i-open" viewBox="0 0 24 24">
+    <path d="M3 19V7a2 2 0 0 1 2-2h4.2l2 2H19a2 2 0 0 1 2 2v1.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M3.3 11.3A1.4 1.4 0 0 1 4.7 10h15.8a1.4 1.4 0 0 1 1.35 1.8l-1.7 5.9a2 2 0 0 1-1.92 1.44H5.5a2 2 0 0 1-1.98-1.72l-.22-6.12Z" fill="currentColor" opacity="0.85"/>
   </symbol>
-  <symbol id="i-cut" viewBox="0 0 16 16">
-    <circle cx="4" cy="4" r="1.9" fill="none" stroke="#d8d8d8" stroke-width="1.2"/>
-    <circle cx="4" cy="12" r="1.9" fill="none" stroke="#d8d8d8" stroke-width="1.2"/>
-    <line x1="5.4" y1="5.2" x2="14" y2="11.5" stroke="#d8d8d8" stroke-width="1.2"/>
-    <line x1="5.4" y1="10.8" x2="14" y2="4.5" stroke="#d8d8d8" stroke-width="1.2"/>
+  <symbol id="i-tab" viewBox="0 0 24 24">
+    <line x1="4" y1="6" x2="13" y2="6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    <line x1="4" y1="12" x2="13" y2="12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    <line x1="4" y1="18" x2="13" y2="18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    <path d="M16.5 8 L20.5 12 L16.5 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
   </symbol>
-  <symbol id="i-copy" viewBox="0 0 16 16">
-    <rect x="2" y="2" width="8" height="10" fill="#888" stroke="#555"/>
-    <rect x="5" y="4" width="9" height="11" fill="#e8e8e8" stroke="#555"/>
-    <line x1="7" y1="7" x2="12" y2="7" stroke="#666"/>
-    <line x1="7" y1="9" x2="12" y2="9" stroke="#666"/>
-    <line x1="7" y1="11" x2="12" y2="11" stroke="#666"/>
+  <symbol id="i-untab" viewBox="0 0 24 24">
+    <line x1="11" y1="6" x2="20" y2="6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    <line x1="11" y1="12" x2="20" y2="12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    <line x1="11" y1="18" x2="20" y2="18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    <path d="M7.5 8 L3.5 12 L7.5 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
   </symbol>
-  <symbol id="i-paste" viewBox="0 0 16 16">
-    <rect x="3" y="3" width="10" height="12" fill="#c8b070" stroke="#665"/>
-    <rect x="5" y="1" width="6" height="3" fill="#888" stroke="#555"/>
-    <line x1="5" y1="7" x2="11" y2="7" stroke="#665"/>
-    <line x1="5" y1="9" x2="11" y2="9" stroke="#665"/>
-    <line x1="5" y1="11" x2="11" y2="11" stroke="#665"/>
+  <symbol id="i-wrap" viewBox="0 0 24 24">
+    <line x1="4" y1="6" x2="20" y2="6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    <line x1="4" y1="12" x2="14" y2="12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    <path d="M4 18 H13 a4 4 0 0 0 4-4 V11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <polyline points="14.8 13.2 17 10.8 19.2 13.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
   </symbol>
-  <symbol id="i-all" viewBox="0 0 16 16">
-    <rect x="1.5" y="1.5" width="13" height="13" fill="none" stroke="#d8d8d8" stroke-dasharray="2 2"/>
-    <text x="8" y="12" text-anchor="middle" fill="#d8d8d8" font-size="10" font-family="monospace" font-weight="bold">A</text>
+  <symbol id="i-all" viewBox="0 0 24 24">
+    <rect x="4" y="4" width="16" height="16" rx="3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="3.2 3.2"/>
+    <rect x="9.5" y="9.5" width="5" height="5" rx="1" fill="currentColor"/>
   </symbol>
-  <symbol id="i-tab" viewBox="0 0 16 16">
-    <path d="M4 3 L4 13 M7 8 L13 8 M13 8 L10 5 M13 8 L10 11" fill="none" stroke="#7ee787" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <symbol id="i-cut" viewBox="0 0 24 24">
+    <circle cx="6" cy="6" r="2.6" fill="none" stroke="currentColor" stroke-width="1.7"/>
+    <circle cx="6" cy="18" r="2.6" fill="none" stroke="currentColor" stroke-width="1.7"/>
+    <line x1="20" y1="4" x2="8.2" y2="15.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+    <line x1="14.6" y1="14.6" x2="20" y2="20" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+    <line x1="8.2" y1="8.2" x2="12" y2="12" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
   </symbol>
-  <symbol id="i-untab" viewBox="0 0 16 16">
-    <path d="M4 3 L4 13 M13 8 L7 8 M7 8 L10 5 M7 8 L10 11" fill="none" stroke="#7ee787" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <symbol id="i-copy" viewBox="0 0 24 24">
+    <rect x="9" y="9" width="12" height="12" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.7"/>
+    <path d="M5 15H4.5A2.5 2.5 0 0 1 2 12.5v-8A2.5 2.5 0 0 1 4.5 2h8A2.5 2.5 0 0 1 15 4.5V5" fill="none" stroke="currentColor" stroke-width="1.7"/>
   </symbol>
-  <symbol id="i-wrap" viewBox="0 0 16 16">
-    <path d="M2 5 L10 5 Q13.5 5 13.5 8 Q13.5 11 10 11 L5 11 M5 11 L7.5 8.5 M5 11 L7.5 13.5" fill="none" stroke="#79c0ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <symbol id="i-paste" viewBox="0 0 24 24">
+    <path d="M15 4h3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h3" fill="none" stroke="currentColor" stroke-width="1.7"/>
+    <rect x="8" y="2" width="8" height="4" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.7"/>
   </symbol>
-  <symbol id="i-pgup" viewBox="0 0 16 16">
-    <path d="M8 13 L8 3 M8 3 L4 7 M8 3 L12 7" fill="none" stroke="#d8d8d8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <symbol id="i-run" viewBox="0 0 24 24">
+    <path d="M8 5.5v13l10-6.5-10-6.5Z" fill="currentColor"/>
   </symbol>
-  <symbol id="i-pgdn" viewBox="0 0 16 16">
-    <path d="M8 3 L8 13 M8 13 L4 9 M8 13 L12 9" fill="none" stroke="#d8d8d8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <symbol id="i-link" viewBox="0 0 24 24">
+    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
   </symbol>
-  <symbol id="i-link" viewBox="0 0 16 16">
-    <path d="M6.5 9.5 L9.5 6.5 M5.5 6.5 L4 8 Q3 9 4 10 L6 12 Q7 13 8 12 L9.5 10.5 M10.5 9.5 L12 8 Q13 7 12 6 L10 4 Q9 3 8 4 L6.5 5.5" fill="none" stroke="#d8d8d8" stroke-width="1.3" stroke-linecap="round"/>
+  <symbol id="i-refresh" viewBox="0 0 24 24">
+    <polyline points="21 4 21 10 15 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M20.49 15A9 9 0 1 1 18.37 5.64L21 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
   </symbol>
-  <symbol id="i-run" viewBox="0 0 16 16">
-    <path d="M4.5 2.5 L13 8 L4.5 13.5 Z" fill="#7ee787" stroke="#3a3a3a" stroke-width="0.7" stroke-linejoin="round"/>
+  <symbol id="i-fullscreen" viewBox="0 0 24 24">
+    <path d="M8 3H5a2 2 0 0 0-2 2v3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    <path d="M16 3h3a2 2 0 0 1 2 2v3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    <path d="M3 16v3a2 2 0 0 0 2 2h3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    <path d="M21 16v3a2 2 0 0 1-2 2h-3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
   </symbol>
-  <symbol id="i-refresh" viewBox="0 0 16 16">
-    <path d="M13 8 A5 5 0 1 1 11.2 4.2 M13 2 L13 6 L9 6" fill="none" stroke="#7ee787" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+  <symbol id="i-exitfs" viewBox="0 0 24 24">
+    <path d="M8 3v3a2 2 0 0 1-2 2H3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    <path d="M21 8h-3a2 2 0 0 1-2-2V3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    <path d="M3 16h3a2 2 0 0 1 2 2v3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    <path d="M16 21v-3a2 2 0 0 1 2-2h3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
   </symbol>
-  <symbol id="i-fullscreen" viewBox="0 0 16 16">
-    <path d="M2 6 L2 2 L6 2 M10 2 L14 2 L14 6 M14 10 L14 14 L10 14 M6 14 L2 14 L2 10" fill="none" stroke="#79c0ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-  </symbol>
-  <symbol id="i-exitfs" viewBox="0 0 16 16">
-    <path d="M6 2 L6 6 L2 6 M10 6 L14 6 L14 2 M14 10 L10 10 L10 14 M6 14 L6 10 L2 10" fill="none" stroke="#79c0ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-  </symbol>
-  <symbol id="i-back" viewBox="0 0 16 16">
-    <path d="M13 8 L3 8 M3 8 L7 4 M3 8 L7 12" fill="none" stroke="#d8d8d8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <symbol id="i-back" viewBox="0 0 24 24">
+    <line x1="19" y1="12" x2="5" y2="12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    <polyline points="12 19 5 12 12 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
   </symbol>
 </svg>
 
@@ -648,16 +625,6 @@ body.run-active #runPane{ display:flex; }
     <button class="btn" data-act="untab" title="Unindent">
       <svg class="ico" aria-hidden="true"><use href="#i-untab"/></svg>
       <span>Untab</span>
-    </button>
-  </div>
-  <div class="btn-group">
-    <button class="btn" data-act="pgup" title="Page Up">
-      <svg class="ico" aria-hidden="true"><use href="#i-pgup"/></svg>
-      <span>PgUp</span>
-    </button>
-    <button class="btn" data-act="pgdn" title="Page Down">
-      <svg class="ico" aria-hidden="true"><use href="#i-pgdn"/></svg>
-      <span>PgDn</span>
     </button>
   </div>
   <div class="btn-group">
@@ -801,7 +768,6 @@ var shareLinkBtn = document.getElementById('shareLinkBtn');
 var modeEdit  = document.getElementById('modeEdit');
 var modeRead  = document.getElementById('modeRead');
 var runBtn    = document.getElementById('runBtn');
-
 var runPane         = document.getElementById('runPane');
 var runFrameWrap    = document.getElementById('runFrameWrap');
 var runReloadBtn    = document.getElementById('runReload');
@@ -989,8 +955,6 @@ function syncRunDomToActive(){
   if(!anyRun){
     document.body.classList.remove('run-active');
   } else {
-    // в run-панели показываем только фрейм активной вкладки (если он есть),
-    // а если активная вкладка не в run — убираем флаг run-active, но фреймы не трогаем
     if(activeFrame){
       document.body.classList.add('run-active');
     } else {
@@ -998,7 +962,6 @@ function syncRunDomToActive(){
     }
   }
 
-  // скрываем/показываем фреймы внутри контейнера
   var all = runFrameWrap.querySelectorAll('iframe.run-frame');
   for(var i=0;i<all.length;i++){
     var f = all[i];
@@ -1256,7 +1219,6 @@ function buildRunHtmlFor(tabId){
   if(!tab) return '';
   var name = tab.name || DEF_NAME;
   var content = tab.content != null ? tab.content : '';
-  // для активной вкладки берём живое значение из редактора (несохранённые правки)
   if(tabId === activeTabId) content = ta.value;
   if(/\.html?$/i.test(name)) return content;
   return wrapHtml(name, content);
@@ -1447,7 +1409,6 @@ function pullFromBin(){
         return { id: tabCounter++, name: t.name || DEF_NAME, content: t.content || '' };
       });
       if(newTabs.length === 0) throw new Error('Empty remote');
-      // убиваем все run-фреймы: вкладки заменяются
       Object.keys(frameByTabId).forEach(function(k){ destroyRunFrameFor(parseInt(k,10)); });
       document.body.classList.remove('run-active');
       tabs = newTabs;
@@ -1469,6 +1430,7 @@ function pullFromBin(){
       return false;
     });
 }
+
 
 function openSyncModal(){
   binIdEl.value = binId;
@@ -1844,7 +1806,7 @@ function icon(size){
   x.fillStyle = '#2e2e2e';
   x.fillRect(0, 0, size, size);
   x.fillStyle = '#7ee787';
-  x.font = 'bold ' + Math.round(size * 0.32) + 'px "MS Sans Serif",Tahoma,monospace';
+  x.font = 'bold ' + Math.round(size * 0.32) + 'px system-ui,Roboto,monospace';
   x.textAlign = 'center';
   x.textBaseline = 'middle';
   x.fillText('>_', size / 2, size / 2);
@@ -1863,8 +1825,8 @@ try {
     scope: scope,
     display: 'standalone',
     orientation: 'any',
-    background_color: '#161616',
-    theme_color: '#161616',
+    background_color: '#2e2e2e',
+    theme_color: '#2e2e2e',
     icons: [
       {src: i192, sizes: '192x192', type: 'image/png', purpose: 'any'},
       {src: i512, sizes: '512x512', type: 'image/png', purpose: 'any'},
