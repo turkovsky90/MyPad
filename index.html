@@ -13,26 +13,33 @@
 <link id="mf" rel="manifest">
 <style>
 :root{
-  --bg:#1a1a1a;
+  --bg:#1f1f1f;
   --tabs-bg:#151515;
-  --surface:#1f1f1f;
+  --surface:#151515;
   --pill:#2a2a2a;
   --pill-hi:#333333;
   --text:#d0d0d0;
   --muted:#7a7a7a;
-  --green:#7ee787;
-  --green-fill:#3d6b41;
-  --green-on:#c9e5cc;
+  --accent:#ffffff;
   --yellow:#e3b341;
   --red:#ff7b72;
   --line:#353535;
-  --fs-body:16px;
-  --fs-btn:13px;
+  --fs-body:14px;
+  --fs-btn:12px;
   --fs-small:11px;
-  --fs-tab:13px;
+  --fs-tab:12px;
 }
 @media (max-width:600px){
-  body { transform: scale(1.25); transform-origin: top left; width: 80%; }
+  body { transform: scale(1.375); transform-origin: top left; width: 72.73%; }
+  .toolbar{ column-gap:6px; row-gap:12px; }
+  .tabs-row{ column-gap:6px; row-gap:12px; }
+  .btn-group{ gap:6px; }
+  .btn{ gap:6px; }
+  .tab{ gap:6px; }
+  #stats{ gap:20px; }
+}
+@media (min-width:601px){
+  body { transform: scale(1.15); transform-origin: top left; width: 86.96%; }
 }
 *{box-sizing:border-box}
 html,body{height:100%;margin:0;overflow:hidden;overscroll-behavior:none}
@@ -46,50 +53,140 @@ body{
   gap:0;
 }
 
-/* ===== панель вкладок ===== */
 .tabs-row{
   display:flex;
   flex-wrap:wrap;
-  gap:6px;
+  column-gap:4px;
+  row-gap:4px;
   align-items:flex-end;
   flex-shrink:0;
-  padding:8px 10px 0;
-  margin-bottom:0;
+  padding:6px 8px 0;
   background:var(--tabs-bg);
   border-bottom:1px solid var(--pill-hi);
+  position:relative;
 }
+.tabs-list{
+  display:flex;
+  flex-wrap:wrap;
+  column-gap:4px;
+  row-gap:4px;
+  align-items:flex-end;
+  flex:1 1 auto;
+  min-width:0;
+}
+.tabs-dropdown-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:26px;
+  height:26px;
+  min-height:26px;
+  background:var(--pill);
+  border:none;
+  border-radius:6px;
+  color:var(--text);
+  cursor:pointer;
+  touch-action:manipulation;
+  user-select:none;
+  -webkit-user-select:none;
+  -webkit-tap-highlight-color:transparent;
+  flex-shrink:0;
+  padding:0;
+  transition:background .15s;
+  margin-bottom:2px;
+}
+.tabs-dropdown-btn:hover{ background:var(--pill-hi); }
+.tabs-dropdown-btn svg{ width:13px; height:13px; display:block; pointer-events:none; }
+.tabs-dropdown{
+  position:absolute;
+  top:100%;
+  left:8px;
+  min-width:220px;
+  max-width:calc(100vw - 24px);
+  max-height:60vh;
+  overflow-y:auto;
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:7px;
+  box-shadow:0 6px 18px rgba(0,0,0,.55);
+  z-index:500;
+  display:none;
+  padding:4px 0;
+}
+.tabs-dropdown.show{ display:block; }
+.tabs-dropdown-header{
+  padding:7px 11px;
+  font-size:var(--fs-small);
+  color:var(--muted);
+  border-bottom:1px solid var(--line);
+  font-weight:600;
+}
+.tabs-dropdown-item{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  padding:8px 11px;
+  cursor:pointer;
+  color:var(--text);
+  font-size:var(--fs-tab);
+  transition:background .1s;
+}
+.tabs-dropdown-item:hover{ background:var(--pill); }
+.tabs-dropdown-item .tab-name{
+  flex:1;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.tabs-dropdown-item .tab-close{
+  font-size:1.15em;
+  color:var(--muted);
+  padding:2px 6px;
+  cursor:pointer;
+  line-height:1;
+  border-radius:4px;
+  flex-shrink:0;
+}
+.tabs-dropdown-item .tab-close:hover{
+  color:var(--red);
+  background:rgba(255,123,114,.12);
+}
+.tabs-dropdown-empty,
+.tabs-dropdown-loading{
+  padding:14px 11px;
+  text-align:center;
+  color:var(--muted);
+  font-size:var(--fs-tab);
+}
+.tabs-dropdown-loading{ color:var(--text); }
+
 .tab{
   display:inline-flex;
   align-items:center;
-  gap:6px;
-  padding:5px 12px;
-  min-height:34px;
-  max-height:34px;
+  gap:4px;
+  padding:3px 9px;
+  min-height:28px;
+  max-height:28px;
   background:var(--pill);
   border:1px solid transparent;
   color:var(--muted);
   font-family:inherit;
   font-size:var(--fs-tab);
   line-height:1.15;
-  border-radius:8px 8px 0 0;
-  cursor:default;
+  border-radius:9px 9px 0 0;
+  cursor:pointer;
   user-select:none;
   -webkit-user-select:none;
   -webkit-tap-highlight-color:transparent;
   flex-shrink:0;
-  max-width:260px;
+  max-width:220px;
   transition:background .15s,color .15s,border-color .15s;
 }
-.tab:hover{
-  background:var(--pill-hi);
-  color:var(--text);
-}
-/* активный таб: выше, без нижней границы, фон = цвет панели кнопок,
-   negative margin перекрывает бордер панели на всю ширину таба */
+.tab:hover{ background:var(--pill-hi); color:var(--text); }
 .tab.active{
-  min-height:38px;
-  max-height:38px;
-  padding-bottom:6px;
+  min-height:32px;
+  max-height:32px;
+  padding-bottom:4px;
   background:var(--bg);
   border-color:var(--pill-hi);
   border-bottom:none;
@@ -104,9 +201,9 @@ body{
 }
 .tab .tb-close{
   font-size:1.05em;
-  padding:0 2px 0 4px;
+  padding:0 2px 0 3px;
   color:inherit;
-  cursor:default;
+  cursor:pointer;
   line-height:1;
 }
 .tab .tb-close:hover{ color:var(--red); }
@@ -114,17 +211,18 @@ body{
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  width:30px;
-  height:30px;
-  min-height:30px;
-  max-height:30px;
+  width:26px;
+  height:26px;
+  min-height:26px;
+  max-height:26px;
   background:var(--pill);
   border:none;
-  border-radius:8px;
+  border-radius:6px;
   color:var(--text);
   font-size:0;
   line-height:0;
-  cursor:default;
+  cursor:pointer;
+  touch-action:manipulation;
   user-select:none;
   -webkit-user-select:none;
   -webkit-tap-highlight-color:transparent;
@@ -134,197 +232,133 @@ body{
   margin-bottom:2px;
 }
 .tab-add:hover{ background:var(--pill-hi); }
-.tab-add svg{
-  width:16px;
-  height:16px;
-  display:block;
-  pointer-events:none;
-}
-.tab.tab-run .tb-name{ color:var(--green); }
-.tab.tab-run.active .tb-name{ color:var(--green); }
+.tab-add svg{ width:13px; height:13px; display:block; pointer-events:none; }
+.tab.tab-run .tb-name,
+.tab.tab-run.active .tb-name{ color:var(--accent); }
 
-/* ===== тулбар ===== */
 .toolbar{
   display:flex;
   flex-wrap:wrap;
-  gap:6px;
+  column-gap:3px;
+  row-gap:3px;
   align-items:center;
   flex-shrink:0;
-  padding:8px 10px;
-  margin:0;
+  padding:5px 8px;
   background:var(--bg);
 }
 .btn-group{
   display:inline-flex;
-  gap:6px;
+  gap:3px;
   align-items:center;
-  padding-right:10px;
+  padding-right:4px;
   border-right:1px solid transparent;
 }
-.btn-group.last-visible{
-  border-right:none;
-  padding-right:0;
-}
-.btn-group.push-right{
-  margin-left:auto;
-  border-right:none;
-  padding-right:0;
-}
+.btn-group.last-visible{ border-right:none; padding-right:0; }
+.btn-group.push-right{ margin-left:auto; border-right:none; padding-right:0; gap:6px; }
 .btn{
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  gap:6px;
-  padding:0 12px;
-  min-height:36px;
+  gap:4px;
+  padding:0 8px;
+  min-height:30px;
   font-family:inherit;
   font-size:var(--fs-btn);
   color:var(--text);
   background:var(--pill);
   border:none;
-  border-radius:8px;
-  cursor:default;
+  border-radius:6px;
+  cursor:pointer;
+  touch-action:manipulation;
   user-select:none;
   -webkit-user-select:none;
   -webkit-tap-highlight-color:transparent;
-  transition:transform .14s cubic-bezier(.34,1.56,.64,1),background-color .15s,color .15s,filter .15s;
+  transition:transform .14s cubic-bezier(.34,1.56,.64,1),background-color .15s,color .15s;
 }
-.btn:hover{
-  background-color:var(--pill-hi);
-}
-.btn:active{
-  transform:scale(.94);
-}
-.btn.pressed{
-  background:var(--green-fill);
-  color:var(--green-on);
-}
-.btn[disabled]{
-  opacity:.4;
-  pointer-events:none;
-  color:var(--muted);
-  background-image:none;
-  box-shadow:none;
-  filter:none;
-}
+.btn:hover{ background-color:var(--pill-hi); }
+.btn:active{ transform:scale(.94); }
+.btn.pressed{ background:#e0e0e0; color:#1a1a1a; }
+.btn.pressed:hover{ background:#d0d0d0; }
+.btn[disabled]{ opacity:.4; pointer-events:none; color:var(--muted); }
 .btn[disabled] .ico{ opacity:.5; }
-.btn.warn-state{
-  color:var(--muted);
-}
-.btn .ico{
-  width:18px;
-  height:18px;
-  flex-shrink:0;
-  display:block;
-}
+.btn.warn-state{ color:var(--muted); }
+.btn .ico{ width:15px; height:15px; flex-shrink:0; display:block; }
+.btn:not(.always-label) .ico + span { display:none !important; }
 
-/* Глобальное скрытие подписей у кнопок, кроме always-label */
-.btn:not(.always-label) .ico + span {
-  display: none !important;
-}
-
-/* ===== деликатная подсветка из уголка ===== */
-.btn-save-as{
-  background-image:radial-gradient(115% 125% at 0% 0%,
-    rgba(59,130,246,.30) 0%, rgba(59,130,246,.10) 32%, rgba(59,130,246,0) 62%);
-}
-.btn-select-all{
-  background-image:radial-gradient(115% 125% at 0% 0%,
-    rgba(245,158,11,.28) 0%, rgba(245,158,11,.09) 32%, rgba(245,158,11,0) 62%);
-}
-.btn-run{
-  background-image:radial-gradient(115% 125% at 0% 0%,
-    rgba(20,184,166,.30) 0%, rgba(20,184,166,.10) 32%, rgba(20,184,166,0) 62%);
-}
-.btn-save-as:hover,
-.btn-select-all:hover,
-.btn-run:hover{
-  filter:brightness(1.14);
-}
+.btn-save-as{ background-color:#1e3a5f; color:#a8c8e8; }
+.btn-save-as:hover{ background-color:#2a4a6f; }
+.btn-select-all{ background-color:#4a3a1e; color:#e8d8a8; }
+.btn-select-all:hover{ background-color:#5a4a2e; }
+.btn-run{ background-color:#1e3a3a; color:#a8e8e8; }
+.btn-run:hover{ background-color:#2a4a4a; }
 
 .mode-toggle{
   display:inline-flex;
   align-items:center;
   gap:2px;
   border:1px solid var(--line);
-  border-radius:14px;
+  border-radius:10px;
   padding:2px;
 }
 .mode-btn{
   background:transparent;
   color:var(--muted);
   font-weight:600;
-  min-height:32px;
-  padding:0 10px;
-  font-size: var(--fs-btn);
-  border-radius:12px;
+  min-height:26px;
+  padding:0 8px;
+  font-size:var(--fs-btn);
+  border-radius:8px;
 }
-.mode-btn:hover{
-  background:var(--pill);
-  color:var(--text);
-}
-.mode-btn.pressed{
-  background:var(--green-fill);
-  color:var(--green-on);
-}
+.mode-btn:hover{ background:var(--pill); color:var(--text); }
+.mode-btn.pressed{ background:#e0e0e0; color:#1a1a1a; }
+.mode-btn.pressed:hover{ background:#d0d0d0; }
 .sync-btn{
-  min-width:36px;
-  min-height:36px;
-  padding:0 10px;
-  font-size:14px;
+  min-width:30px;
+  min-height:30px;
+  padding:0 8px;
+  font-size:13px;
   font-weight:700;
-  justify-content:center;
   color:var(--muted);
 }
-.sync-btn:hover{
-  background:var(--pill-hi);
-}
-.sync-btn.ok{ color:var(--green); }
+.sync-btn:hover{ background:var(--pill-hi); }
+.sync-btn.ok{ color:var(--accent); }
 .sync-btn.err{ color:var(--red); }
 .sync-btn.local{ color:var(--muted); }
-.sync-btn.loading{
-  color:var(--yellow);
-  animation: blink-loading 0.9s ease-in-out infinite;
-}
-@keyframes blink-loading{
-  0%, 100%{ opacity:1; }
-  50%{ opacity:0.35; }
-}
+.sync-btn.loading{ color:var(--yellow); animation:blink-loading .9s ease-in-out infinite; }
+@keyframes blink-loading{ 0%,100%{opacity:1} 50%{opacity:.35} }
 @keyframes pulse-warn{
-  0%, 100%{ outline:0 solid var(--yellow); outline-offset:0; }
+  0%,100%{ outline:0 solid var(--yellow); outline-offset:0; }
   50%{ outline:3px solid var(--yellow); outline-offset:2px; }
 }
-.btn.pulse-warn{
-  animation: pulse-warn 0.55s ease-in-out 2;
-}
+.btn.pulse-warn{ animation:pulse-warn .55s ease-in-out 2; }
 
-/* ===== статус-строка (тонкая панель внизу) ===== */
 #stats{
   flex-shrink:0;
-  font-size:10px;
+  font-size:11px;
   color:var(--muted);
   white-space:nowrap;
   display:flex;
   align-items:center;
   justify-content:flex-end;
-  padding:3px 10px;
-  gap:8px;
-  line-height:1;
-  background:var(--tabs-bg);
+  padding:0 10px 3px 10px;
+  gap:12px;
+  line-height:1.3;
+  background:var(--bg);
+  letter-spacing:.2px;
+  border-bottom:1px solid var(--line);
 }
 .ro-badge{
   display:inline-block;
   color:var(--yellow);
   border:1px solid var(--yellow);
   padding:0 4px;
-  font-size:0.82em;
+  font-size:.82em;
   font-weight:bold;
-  letter-spacing:0.5px;
+  letter-spacing:.5px;
   border-radius:3px;
   vertical-align:middle;
 }
 
-/* ===== редактор ===== */
 #ta{
   flex:1 1 auto;
   width:100%;
@@ -332,7 +366,7 @@ body{
   resize:none;
   border:none;
   outline:0;
-  padding:12px 16px;
+  padding:10px 14px;
   margin:0;
   background:var(--surface);
   color:#e4e4e4;
@@ -341,243 +375,115 @@ body{
   line-height:1.5;
   white-space:pre;
   overflow:auto;
-  overflow-wrap:normal;
-  word-break:normal;
-  caret-color:var(--green);
+  caret-color:var(--accent);
   user-select:text;
   -webkit-user-select:text;
 }
-#ta.wrap{
-  white-space:pre-wrap;
-  overflow-wrap:break-word;
-  word-break:break-word;
-}
-#ta[readonly]{
-  color:#e4e4e4;
-  caret-color:transparent;
-}
-body.readonly-view .edit-only{
-  display:none !important;
-}
+#ta.wrap{ white-space:pre-wrap; overflow-wrap:break-word; word-break:break-word; }
+#ta[readonly]{ color:#e4e4e4; caret-color:transparent; }
+body.readonly-view .edit-only{ display:none !important; }
 
-/* ===== модальный диалог ===== */
 .modal-overlay{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,0.6);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  z-index:1000;
-  padding:16px;
+  position:fixed; inset:0;
+  background:rgba(0,0,0,.6);
+  display:flex; align-items:center; justify-content:center;
+  z-index:1000; padding:16px;
 }
 .modal-overlay[hidden]{ display:none; }
 .modal-window{
-  width:min(560px,100%);
+  width:min(520px,100%);
   max-height:calc(100vh - 32px);
   background:var(--surface);
-  border-radius:28px;
-  display:flex;
-  flex-direction:column;
-  overflow:hidden;
+  border-radius:24px;
+  display:flex; flex-direction:column; overflow:hidden;
   animation:modal-in .28s cubic-bezier(.34,1.4,.64,1);
 }
-@keyframes modal-in{
-  from{ transform:scale(.92); opacity:0; }
-  to{ transform:scale(1); opacity:1; }
-}
+@keyframes modal-in{ from{transform:scale(.92);opacity:0} to{transform:scale(1);opacity:1} }
 .modal-title{
   color:var(--text);
-  padding:20px 20px 8px;
-  font-size:18px;
-  font-weight:600;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
+  padding:18px 18px 7px;
+  font-size:16px; font-weight:600;
+  display:flex; justify-content:space-between; align-items:center;
   flex-shrink:0;
 }
 .modal-close{
-  width:40px;
-  height:40px;
-  padding:0;
-  font-size:20px;
-  line-height:1;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:transparent;
-  color:var(--muted);
-  border:none;
-  border-radius:50%;
-  cursor:default;
+  width:36px; height:36px; padding:0;
+  font-size:18px; line-height:1;
+  display:flex; align-items:center; justify-content:center;
+  background:transparent; color:var(--muted);
+  border:none; border-radius:50%; cursor:pointer;
 }
 .modal-close:active{ background:var(--pill); }
 .modal-body{
-  padding:8px 20px 20px;
-  display:flex;
-  flex-direction:column;
-  gap:14px;
+  padding:7px 18px 18px;
+  display:flex; flex-direction:column; gap:12px;
   overflow-y:auto;
-  font-size:var(--fs-small);
-  color:var(--text);
+  font-size:var(--fs-small); color:var(--text);
 }
 .status-row{
-  display:flex;
-  align-items:center;
-  gap:9px;
-  padding:10px 14px;
-  background:rgba(255,255,255,0.04);
-  border:1px solid var(--line);
-  border-radius:14px;
-}
-.status-row .smiley{
-  font-size:1.4em;
-  font-weight:bold;
-  line-height:1;
-}
-.status-row .smiley.ok{ color:var(--green); }
-.status-row .smiley.err{ color:var(--red); }
-.status-row .smiley.local{ color:var(--muted); }
-.status-row .smiley.loading{
-  color:var(--yellow);
-  animation: blink-loading 0.9s ease-in-out infinite;
-}
-.field-row{
-  display:flex;
-  gap:9px;
-  align-items:center;
-  flex-wrap:wrap;
-}
-.field-row label{
-  min-width:126px;
-  font-size:var(--fs-small);
-}
-.field-row input{
-  flex:1;
-  min-width:0;
-  font-family:inherit;
-  font-size:var(--fs-small);
-  background:transparent;
-  color:var(--text);
+  display:flex; align-items:center; gap:8px;
+  padding:9px 12px;
+  background:rgba(255,255,255,.04);
   border:1px solid var(--line);
   border-radius:12px;
-  outline:none;
-  padding:8px 12px;
-  min-height:40px;
+}
+.status-row .smiley{ font-size:1.4em; font-weight:bold; line-height:1; }
+.status-row .smiley.ok{ color:var(--accent); }
+.status-row .smiley.err{ color:var(--red); }
+.status-row .smiley.local{ color:var(--muted); }
+.status-row .smiley.loading{ color:var(--yellow); animation:blink-loading .9s ease-in-out infinite; }
+.field-row{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.field-row label{ min-width:110px; font-size:var(--fs-small); }
+.field-row input{
+  flex:1; min-width:0;
+  font-family:inherit; font-size:var(--fs-small);
+  background:transparent; color:var(--text);
+  border:1px solid var(--line); border-radius:10px;
+  outline:none; padding:7px 10px; min-height:36px;
   transition:border-color .15s;
 }
-.field-row input:focus{
-  border-color:var(--green);
-}
-fieldset{
-  border:1px solid var(--line);
-  border-radius:14px;
-  padding:10px 14px 12px;
-  margin:0;
-}
-legend{
-  padding:0 7px;
-  color:var(--text);
-  font-size:var(--fs-small);
-}
-.modal-body ol{
-  margin:0 0 7px;
-  padding-left:22px;
-}
-.modal-body ol li{ margin-bottom:7px; }
+.field-row input:focus{ border-color:var(--accent); }
+fieldset{ border:1px solid var(--line); border-radius:12px; padding:9px 12px 10px; margin:0; }
+legend{ padding:0 6px; color:var(--text); font-size:var(--fs-small); }
+.modal-body ol{ margin:0 0 6px; padding-left:20px; }
+.modal-body ol li{ margin-bottom:6px; }
 .modal-body code{
-  background:rgba(0,0,0,0.35);
-  padding:2px 6px;
-  border-radius:6px;
-  font-family:ui-monospace,monospace;
-  font-size:0.9em;
-  color:var(--green);
-  word-break:break-all;
+  background:rgba(0,0,0,.35);
+  padding:2px 5px; border-radius:5px;
+  font-family:ui-monospace,monospace; font-size:.9em;
+  color:var(--accent); word-break:break-all;
 }
-.modal-body a{
-  color:var(--green);
-}
-.btn-copy-template{
-  font-size:12px;
-  min-height:28px;
-  padding:2px 10px;
-  margin-left:7px;
-  vertical-align:middle;
-}
-.note{
-  margin:9px 0 0;
-  font-style:italic;
-  color:var(--muted);
-}
-.modal-actions{
-  display:flex;
-  gap:9px;
-  justify-content:flex-end;
-  flex-wrap:wrap;
-}
-.modal-actions .btn{
-  min-height:36px;
-}
+.modal-body a{ color:var(--accent); }
+.btn-copy-template{ font-size:11px; min-height:26px; padding:2px 9px; margin-left:6px; vertical-align:middle; }
+.note{ margin:8px 0 0; font-style:italic; color:var(--muted); }
+.modal-actions{ display:flex; gap:8px; justify-content:flex-end; flex-wrap:wrap; }
+.modal-actions .btn{ min-height:32px; }
 
-/* === Run-режим === */
 body.run-active #toolbar{ display:none !important; }
+body.run-active #stats{ display:none !important; }
 body.run-active #ta{ display:none !important; }
-
-#runPane{
-  flex:1 1 auto;
-  min-height:0;
-  display:none;
-  flex-direction:column;
-}
+#runPane{ flex:1 1 auto; min-height:0; display:none; flex-direction:column; }
 body.run-active #runPane{ display:flex; }
-
 .run-panel-toolbar{
-  display:flex;
-  gap:6px;
-  align-items:center;
-  flex-shrink:0;
-  padding:8px 10px;
-  margin:0;
+  display:flex; gap:4px; align-items:center; flex-shrink:0;
+  padding:5px 8px;
   background:var(--bg);
-  padding-top: calc(8px + env(safe-area-inset-top, 0px));
+  padding-top:calc(5px + env(safe-area-inset-top, 0px));
   border-bottom:1px solid var(--line);
 }
 .run-panel-toolbar .spacer{ flex:1 1 auto; }
-
 .run-frame-wrap{
-  flex:1 1 auto;
-  min-height:0;
-  display:flex;
-  background:#fff;
-  box-shadow:none;
-  border:none;
-  position:relative;
+  flex:1 1 auto; min-height:0; display:flex;
+  background:#fff; border:none; position:relative;
 }
 .run-frame-wrap iframe.run-frame{
-  position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
-  border:none;
-  background:#fff;
-  display:none;
-  color-scheme:light;
-  margin:0;
-  padding:0;
+  position:absolute; inset:0; width:100%; height:100%;
+  border:none; background:#fff; display:none;
+  color-scheme:light; margin:0; padding:0;
 }
-.run-frame-wrap iframe.run-frame.run-visible{
-  display:block;
-}
-.run-frame-wrap:fullscreen{
-  background:#fff;
-  box-shadow:none;
-}
-.run-frame-wrap:fullscreen iframe.run-frame{
-  position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
-}
+.run-frame-wrap iframe.run-frame.run-visible{ display:block; }
+.run-frame-wrap:fullscreen{ background:#fff; }
+.run-frame-wrap:fullscreen iframe.run-frame{ position:absolute; inset:0; width:100%; height:100%; }
 </style>
 </head>
 <body>
@@ -638,15 +544,24 @@ body.run-active #runPane{ display:flex; }
   <symbol id="i-exitfs" viewBox="0 0 24 24">
     <path d="M9 4v3a2 2 0 0 1-2 2H4M20 9h-3a2 2 0 0 1-2-2V4M15 20v-3a2 2 0 0 1 2-2h3M4 15h3a2 2 0 0 1 2 2v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
   </symbol>
-  <symbol id="i-back" viewBox="0 0 24 24">
-    <path d="M20 12H4M11 19l-7-7 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <symbol id="i-close" viewBox="0 0 24 24">
+    <path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
   </symbol>
   <symbol id="i-plus" viewBox="0 0 24 24">
     <path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
   </symbol>
+  <symbol id="i-chevron-down" viewBox="0 0 24 24">
+    <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
 </svg>
 
-<div class="tabs-row" id="tabs"></div>
+<div class="tabs-row" id="tabsRow">
+  <button class="tabs-dropdown-btn" id="tabsDropdownBtn" title="Tabs from other devices" aria-label="Tabs from other devices">
+    <svg aria-hidden="true"><use href="#i-chevron-down"/></svg>
+  </button>
+  <div class="tabs-list" id="tabs"></div>
+  <div class="tabs-dropdown" id="tabsDropdown"></div>
+</div>
 
 <div class="toolbar" id="toolbar">
   <div class="btn-group edit-only">
@@ -693,12 +608,6 @@ body.run-active #runPane{ display:flex; }
       <span>Paste</span>
     </button>
   </div>
-  <div class="btn-group">
-    <button class="btn always-label btn-run" data-act="run" id="runBtn" title="Run HTML (Ctrl+Enter)">
-      <svg class="ico" aria-hidden="true"><use href="#i-run"/></svg>
-      <span>Run</span>
-    </button>
-  </div>
   <div class="btn-group push-right">
     <div class="mode-toggle edit-only">
       <button class="btn mode-btn pressed" data-mode="edit" id="modeEdit" title="Edit mode">Edit</button>
@@ -709,8 +618,14 @@ body.run-active #runPane{ display:flex; }
       <span>Link</span>
     </button>
     <button class="btn sync-btn local edit-only" data-act="sync-open" id="syncBtn" title="JSONBin sync">:|</button>
+    <button class="btn always-label btn-run" data-act="run" id="runBtn" title="Run HTML (Ctrl+Enter)">
+      <svg class="ico" aria-hidden="true"><use href="#i-run"/></svg>
+      <span>Run</span>
+    </button>
   </div>
 </div>
+
+<div id="stats"></div>
 
 <textarea id="ta" spellcheck="false" autocapitalize="off" autocorrect="off" autocomplete="off" aria-label="editor"></textarea>
 
@@ -725,15 +640,13 @@ body.run-active #runPane{ display:flex; }
       <span id="runFsLabel">Fullscreen</span>
     </button>
     <div class="spacer"></div>
-    <button class="btn" id="runBackToCode" title="Back to code">
-      <svg class="ico" aria-hidden="true"><use href="#i-back"/></svg>
-      <span>Code</span>
+    <button class="btn" id="runBackToCode" title="Exit run mode">
+      <svg class="ico" aria-hidden="true"><use href="#i-close"/></svg>
+      <span>Close</span>
     </button>
   </div>
   <div class="run-frame-wrap" id="runFrameWrap"></div>
 </div>
-
-<div id="stats"></div>
 
 <div class="modal-overlay" id="syncModal" hidden>
   <div class="modal-window">
@@ -763,14 +676,14 @@ body.run-active #runPane{ display:flex; }
         <ol>
           <li>Sign up at <a href="https://jsonbin.io/" target="_blank" rel="noopener">jsonbin.io</a> (free).</li>
           <li>Create a new private bin and paste this as its content:
-            <code>{"v":1,"tabs":[{"id":1,"name":"index.html","content":""}],"activeTabId":1}</code>
-            <button class="btn btn-copy-template" data-copy-text='{"v":1,"tabs":[{"id":1,"name":"index.html","content":""}],"activeTabId":1}'>Copy template</button>
+            <code>{"v":3,"nextTabId":2,"allTabs":[{"id":1,"name":"index.html","content":"","updatedAt":0}],"deletedIds":[]}</code>
+            <button class="btn btn-copy-template" data-copy-text='{"v":3,"nextTabId":2,"allTabs":[{"id":1,"name":"index.html","content":"","updatedAt":0}],"deletedIds":[]}'>Copy template</button>
           </li>
           <li>Copy the Bin ID from the bin URL (the part after <code>/b/</code>).</li>
           <li>Open the API Keys page and copy your X-Master-Key.</li>
           <li>Paste both values above and click Save &amp; Sync.</li>
         </ol>
-        <p class="note">If Bin ID is empty, a new private bin will be created automatically using your key. Auto-sync runs on every launch.</p>
+        <p class="note">Content syncs automatically. Each device keeps its own open tabs. The dropdown lists tabs from OTHER devices; deleting there removes the tab everywhere.</p>
       </fieldset>
 
       <div class="modal-actions">
@@ -787,69 +700,88 @@ body.run-active #runPane{ display:flex; }
 (function(){
 'use strict';
 
-var KEY_TABS        = 'asciinote2.tabs';
-var KEY_ACTIVE      = 'asciinote2.active';
-var KEY_WRAP        = 'asciinote2.wrap';
-var KEY_SHARE_MODE  = 'asciinote2.shareMode';
-var KEY_BIN_ID      = 'asciinote2.binId';
-var KEY_BIN_KEY     = 'asciinote2.binKey';
+var KEY_LOCAL_TABS = 'asciinote2.localTabs';
+var KEY_LOCAL_IDS  = 'asciinote2.localTabIds';
+var KEY_ALL_TABS   = 'asciinote2.allTabs';
+var KEY_DELETED    = 'asciinote2.deletedIds';
+var KEY_NEXT_ID    = 'asciinote2.nextTabId';
+var KEY_ACTIVE     = 'asciinote2.active';
+var KEY_WRAP       = 'asciinote2.wrap';
+var KEY_SHARE_MODE = 'asciinote2.shareMode';
+var KEY_BIN_ID     = 'asciinote2.binId';
+var KEY_BIN_KEY    = 'asciinote2.binKey';
+var KEY_MIGRATED   = 'asciinote2.migratedV2';
 
-var DEF_NAME  = 'index.html';
-var INDENT    = '  ';
+var DEF_NAME = 'index.html';
+var INDENT   = '  ';
 var JSONBIN_BASE = 'https://api.jsonbin.io/v3';
 
-var ta        = document.getElementById('ta');
-var statsEl   = document.getElementById('stats');
-var fileEl    = document.getElementById('file');
-var wrapBtn   = document.getElementById('wrapBtn');
-var wrapLabel = document.getElementById('wrapLabel');
-var toolbar   = document.getElementById('toolbar');
-var tabsEl    = document.getElementById('tabs');
-var syncBtn   = document.getElementById('syncBtn');
+var ta       = document.getElementById('ta');
+var statsEl  = document.getElementById('stats');
+var fileEl   = document.getElementById('file');
+var wrapBtn  = document.getElementById('wrapBtn');
+var wrapLabel= document.getElementById('wrapLabel');
+var toolbar  = document.getElementById('toolbar');
+var tabsEl   = document.getElementById('tabs');
+var syncBtn  = document.getElementById('syncBtn');
 var shareLinkBtn = document.getElementById('shareLinkBtn');
-var modeEdit  = document.getElementById('modeEdit');
-var modeRead  = document.getElementById('modeRead');
-var runBtn    = document.getElementById('runBtn');
-var runPane         = document.getElementById('runPane');
-var runFrameWrap    = document.getElementById('runFrameWrap');
-var runReloadBtn    = document.getElementById('runReload');
-var runFsBtn        = document.getElementById('runFullscreen');
-var runFsIcon       = document.getElementById('runFsIcon');
-var runFsLabel      = document.getElementById('runFsLabel');
-var runBackToCode   = document.getElementById('runBackToCode');
+var modeEdit = document.getElementById('modeEdit');
+var modeRead = document.getElementById('modeRead');
+var runBtn   = document.getElementById('runBtn');
+var runFrameWrap = document.getElementById('runFrameWrap');
+var runReloadBtn = document.getElementById('runReload');
+var runFsBtn     = document.getElementById('runFullscreen');
+var runFsIcon    = document.getElementById('runFsIcon');
+var runFsLabel   = document.getElementById('runFsLabel');
+var runBackToCode= document.getElementById('runBackToCode');
 
-var syncModal       = document.getElementById('syncModal');
-var modalClose      = document.getElementById('modalClose');
-var binIdEl         = document.getElementById('binId');
-var binKeyEl        = document.getElementById('binKey');
-var modalSmiley     = document.getElementById('modalSmiley');
+var tabsDropdownBtn = document.getElementById('tabsDropdownBtn');
+var tabsDropdown    = document.getElementById('tabsDropdown');
+
+var syncModal   = document.getElementById('syncModal');
+var modalClose  = document.getElementById('modalClose');
+var binIdEl     = document.getElementById('binId');
+var binKeyEl    = document.getElementById('binKey');
+var modalSmiley = document.getElementById('modalSmiley');
 var modalStatusText = document.getElementById('modalStatusText');
-var modalSyncBtn    = document.getElementById('modalSync');
-var modalPullBtn    = document.getElementById('modalPull');
+var modalSyncBtn = document.getElementById('modalSync');
+var modalPullBtn = document.getElementById('modalPull');
 
 function lsGet(k){ try{ return localStorage.getItem(k) || ''; }catch(e){ return ''; } }
 function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+function lsGetJSON(k,def){
+  var raw = lsGet(k);
+  if(!raw) return def;
+  try{ return JSON.parse(raw); }catch(e){ return def; }
+}
+function lsSetJSON(k,v){ lsSet(k, JSON.stringify(v)); }
 
 var wrapMode = false;
-try { wrapMode = localStorage.getItem(KEY_WRAP) === '1'; } catch(e){}
+try{ wrapMode = localStorage.getItem(KEY_WRAP) === '1'; }catch(e){}
 
 var shareMode = 'edit';
-try {
+try{
   var sm = localStorage.getItem(KEY_SHARE_MODE);
   if(sm === 'read' || sm === 'edit') shareMode = sm;
-} catch(e){}
+}catch(e){}
 
-var binId   = lsGet(KEY_BIN_ID);
-var binKey  = lsGet(KEY_BIN_KEY);
+var binId  = lsGet(KEY_BIN_ID);
+var binKey = lsGet(KEY_BIN_KEY);
 var syncState = 'local';
 var syncTimer = null;
-var lastSyncedHash = '';
+var syncInFlight = false;
 
 var isReadOnlyView = false;
 var lastInputTime = 0;
 var scrollSnapTimer = null;
-
 var frameByTabId = {};
+
+var allTabs = [];
+var deletedIds = [];
+var tabs = [];
+var localTabIds = [];
+var activeTabId = 0;
+var tabCounter = 1;
 
 function escHtml(s){
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -857,57 +789,120 @@ function escHtml(s){
 function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function unesc(s){ return s.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&'); }
 
-function loadTabsData(){
-  var raw = lsGet(KEY_TABS);
-  if(raw){
+function migrateFromV1(){
+  if(lsGet(KEY_MIGRATED) === '1') return;
+  var oldTabsRaw = lsGet('asciinote2.tabs');
+  if(oldTabsRaw){
     try{
-      var parsed = JSON.parse(raw);
-      if(Array.isArray(parsed) && parsed.length > 0) return parsed;
+      var oldTabs = JSON.parse(oldTabsRaw);
+      if(Array.isArray(oldTabs) && oldTabs.length){
+        var now = Date.now();
+        allTabs = oldTabs.map(function(t){
+          return {id:t.id, name:t.name||DEF_NAME, content:t.content||'', updatedAt:now};
+        });
+        localTabIds = allTabs.map(function(t){ return t.id; });
+        var maxId = 0;
+        allTabs.forEach(function(t){ if(t.id > maxId) maxId = t.id; });
+        tabCounter = maxId + 1;
+        lsSetJSON(KEY_ALL_TABS, allTabs);
+        lsSetJSON(KEY_LOCAL_TABS, allTabs);
+        lsSetJSON(KEY_LOCAL_IDS, localTabIds);
+        lsSet(KEY_NEXT_ID, String(tabCounter));
+      }
     }catch(e){}
   }
-  var oldText = lsGet('asciinote.text');
-  var oldName = lsGet('asciinote.name') || DEF_NAME;
-  if(oldName === 'note.html') oldName = DEF_NAME;
-  return [{id:1, name:oldName, content:oldText || ''}];
+  if(allTabs.length === 0){
+    var oldText = lsGet('asciinote.text');
+    var oldName = lsGet('asciinote.name') || DEF_NAME;
+    if(oldName === 'note.html') oldName = DEF_NAME;
+    if(oldText){
+      allTabs = [{id:1, name:oldName, content:oldText, updatedAt:Date.now()}];
+      localTabIds = [1];
+      tabCounter = 2;
+      lsSetJSON(KEY_ALL_TABS, allTabs);
+      lsSetJSON(KEY_LOCAL_TABS, allTabs);
+      lsSetJSON(KEY_LOCAL_IDS, localTabIds);
+      lsSet(KEY_NEXT_ID, '2');
+    }
+  }
+  lsSet(KEY_MIGRATED, '1');
 }
 
-var tabs = loadTabsData();
-var activeTabId = parseInt(lsGet(KEY_ACTIVE) || '0', 10) || tabs[0].id;
-if(!tabs.some(function(t){ return t.id === activeTabId; })) activeTabId = tabs[0].id;
-var tabCounter = 1;
-tabs.forEach(function(t){ if(t.id >= tabCounter) tabCounter = t.id + 1; });
+function loadData(){
+  migrateFromV1();
+  allTabs    = lsGetJSON(KEY_ALL_TABS, []);
+  deletedIds = lsGetJSON(KEY_DELETED, []);
+  localTabIds= lsGetJSON(KEY_LOCAL_IDS, []);
+  tabCounter = parseInt(lsGet(KEY_NEXT_ID) || '1', 10) || 1;
 
-function findTab(id){
+  allTabs = allTabs.filter(function(t){ return deletedIds.indexOf(t.id) < 0; });
+  localTabIds = localTabIds.filter(function(id){ return deletedIds.indexOf(id) < 0; });
+
+  var cached = lsGetJSON(KEY_LOCAL_TABS, []);
+  var cachedById = {};
+  cached.forEach(function(t){ cachedById[t.id] = t; });
+
+  tabs = [];
+  localTabIds.forEach(function(id){
+    var found = findInAll(id);
+    if(found){ tabs.push(found); }
+    else if(cachedById[id]){
+      var c = cachedById[id];
+      var nt = {id:c.id, name:c.name||DEF_NAME, content:c.content||'', updatedAt:Date.now()};
+      allTabs.push(nt);
+      tabs.push(nt);
+    }
+  });
+  localTabIds = tabs.map(function(t){ return t.id; });
+
+  if(tabs.length === 0){
+    var d = {id:tabCounter++, name:DEF_NAME, content:'', updatedAt:Date.now()};
+    allTabs.push(d); tabs.push(d); localTabIds = [d.id];
+  }
+
+  activeTabId = parseInt(lsGet(KEY_ACTIVE) || '0', 10) || 0;
+  if(!findLocal(activeTabId)) activeTabId = tabs[0].id;
+
+  var maxId = 0;
+  allTabs.forEach(function(t){ if(t.id > maxId) maxId = t.id; });
+  deletedIds.forEach(function(id){ if(id > maxId) maxId = id; });
+  if(tabCounter <= maxId) tabCounter = maxId + 1;
+
+  persistAll();
+}
+
+function persistAll(){
+  lsSetJSON(KEY_ALL_TABS, allTabs);
+  lsSetJSON(KEY_DELETED, deletedIds);
+  lsSetJSON(KEY_LOCAL_TABS, tabs);
+  lsSetJSON(KEY_LOCAL_IDS, localTabIds);
+  lsSet(KEY_NEXT_ID, String(tabCounter));
+  lsSet(KEY_ACTIVE, String(activeTabId));
+}
+
+function findInAll(id){
+  for(var i=0;i<allTabs.length;i++) if(allTabs[i].id === id) return allTabs[i];
+  return null;
+}
+function findLocal(id){
   for(var i=0;i<tabs.length;i++) if(tabs[i].id === id) return tabs[i];
   return null;
 }
-
-function saveTabsData(){
-  try{
-    lsSet(KEY_TABS, JSON.stringify(tabs));
-    lsSet(KEY_ACTIVE, String(activeTabId));
-  }catch(e){}
-}
-
 function saveCurrentContentToTab(){
-  var cur = findTab(activeTabId);
-  if(cur) cur.content = ta.value;
+  var cur = findLocal(activeTabId);
+  if(cur && cur.content !== ta.value){
+    cur.content = ta.value;
+    cur.updatedAt = Date.now();
+  }
 }
 
-function canRunCurrent(){
-  if(ta.value.length === 0) return false;
-  return true;
-}
-
+function canRunCurrent(){ return ta.value.length > 0; }
 function updateRunButtonState(){
   var ok = canRunCurrent();
   runBtn.disabled = !ok;
   runBtn.title = ok ? 'Run HTML (Ctrl+Enter)' : 'Nothing to run';
 }
-
-function isRunTabActive(){
-  return !!frameByTabId[activeTabId];
-}
+function isRunTabActive(){ return !!frameByTabId[activeTabId]; }
 
 function renderTabs(){
   var html = '';
@@ -915,15 +910,14 @@ function renderTabs(){
   for(var i=0;i<tabs.length;i++){
     var t = tabs[i];
     var isActive = t.id === activeTabId;
-    var dn = t.name.length > 20 ? t.name.substring(0,18) + '..' : t.name;
+    var dn = t.name.length > 20 ? t.name.substring(0,18)+'..' : t.name;
     var title = isActive ? (isReadOnlyView ? 'Active tab' : 'Click to rename') : 'Click to switch';
     var isRun = !!frameByTabId[t.id];
-    var extraCls = isRun ? ' tab-run' : '';
-    var shownName = isRun ? ('\u25B6 ' + dn) : dn;
-    html += '<span class="tab ' + (isActive ? 'active' : 'inactive') + extraCls + '" data-tab-id="' + t.id + '" title="' + title + '">';
-    html += '<span class="tb-name" data-action="name">' + escHtml(shownName) + '</span>';
+    var shown = isRun ? ('\u25B6 ' + dn) : dn;
+    html += '<span class="tab '+(isActive?'active':'inactive')+(isRun?' tab-run':'')+'" data-tab-id="'+t.id+'" title="'+title+'">';
+    html += '<span class="tb-name">'+escHtml(shown)+'</span>';
     if(multi && !isReadOnlyView){
-      html += '<span class="tb-close" data-action="close" title="Close tab">&#215;</span>';
+      html += '<span class="tb-close" data-action="close" title="Close on this device">&#215;</span>';
     }
     html += '</span>';
   }
@@ -932,6 +926,138 @@ function renderTabs(){
   }
   tabsEl.innerHTML = html;
 }
+
+function renderTabsDropdown(){
+  if(!binId || !binKey){
+    tabsDropdown.innerHTML = '<div class="tabs-dropdown-empty">Sync not configured</div>';
+    return;
+  }
+  var other = allTabs.filter(function(t){ return localTabIds.indexOf(t.id) < 0; });
+  if(other.length === 0){
+    tabsDropdown.innerHTML = '<div class="tabs-dropdown-empty">No tabs from other devices</div>';
+    return;
+  }
+  var html = '<div class="tabs-dropdown-header">Tabs from other devices</div>';
+  other.forEach(function(t){
+    html += '<div class="tabs-dropdown-item" data-remote-tab-id="'+t.id+'">';
+    html += '<span class="tab-name">'+escHtml(t.name)+'</span>';
+    html += '<span class="tab-close" data-action="delete" title="Delete everywhere">&#215;</span>';
+    html += '</div>';
+  });
+  tabsDropdown.innerHTML = html;
+}
+
+function isDropdownOpen(){ return tabsDropdown.classList.contains('show'); }
+function openDropdown(){
+  tabsDropdown.classList.add('show');
+  if(binId && binKey){
+    tabsDropdown.innerHTML = '<div class="tabs-dropdown-loading">Loading tabs from cloud...</div>';
+    doSync(true).then(function(){
+      if(isDropdownOpen()) renderTabsDropdown();
+    }).catch(function(){
+      if(isDropdownOpen()) renderTabsDropdown();
+    });
+  } else {
+    renderTabsDropdown();
+  }
+}
+function closeDropdown(){ tabsDropdown.classList.remove('show'); }
+
+tabsDropdownBtn.addEventListener('click', function(e){
+  e.preventDefault();
+  e.stopPropagation();
+  if(isDropdownOpen()) closeDropdown(); else openDropdown();
+});
+
+tabsDropdown.addEventListener('click', function(e){
+  e.stopPropagation();
+  var item = e.target.closest('[data-remote-tab-id]');
+  if(!item) return;
+  var id = parseInt(item.getAttribute('data-remote-tab-id'), 10);
+  if(isNaN(id)) return;
+  if(e.target.closest('[data-action="delete"]')){
+    deleteTabEverywhere(id);
+    return;
+  }
+  importTabLocally(id);
+});
+
+document.addEventListener('click', function(e){
+  if(!isDropdownOpen()) return;
+  if(tabsDropdown.contains(e.target)) return;
+  if(tabsDropdownBtn.contains(e.target)) return;
+  closeDropdown();
+});
+
+function importTabLocally(id){
+  var t = findInAll(id);
+  if(!t) return;
+  if(localTabIds.indexOf(id) >= 0){ setActiveTab(id); closeDropdown(); return; }
+  saveCurrentContentToTab();
+  localTabIds.push(id);
+  tabs.push(t);
+  activeTabId = id;
+  ta.value = t.content;
+  updateStats(); updateRunButtonState();
+  persistAll(); renderTabs(); syncRunDomToActive();
+  ta.focus({preventScroll:true});
+  closeDropdown();
+  scheduleSync();
+}
+
+function deleteTabEverywhere(id){
+  var t = findInAll(id);
+  if(!t) return;
+  var ok = false;
+  try{ ok = window.confirm('Delete tab "'+t.name+'" on ALL devices?\n\nThis cannot be undone.'); }catch(e){ ok = true; }
+  if(!ok) return;
+
+  if(deletedIds.indexOf(id) < 0) deletedIds.push(id);
+
+  var ai = allTabs.findIndex(function(x){ return x.id === id; });
+  if(ai >= 0) allTabs.splice(ai,1);
+
+  var li = localTabIds.indexOf(id);
+  if(li >= 0) localTabIds.splice(li,1);
+
+  var ti = tabs.findIndex(function(x){ return x.id === id; });
+  if(ti >= 0){
+    tabs.splice(ti,1);
+    destroyRunFrameFor(id);
+    if(activeTabId === id){
+      if(tabs.length === 0){
+        var d = {id:tabCounter++, name:DEF_NAME, content:'', updatedAt:Date.now()};
+        allTabs.push(d); tabs.push(d); localTabIds.push(d.id);
+        activeTabId = d.id; ta.value = '';
+      } else {
+        activeTabId = tabs[Math.min(ti, tabs.length-1)].id;
+        ta.value = findLocal(activeTabId).content;
+      }
+      updateStats(); updateRunButtonState(); syncRunDomToActive();
+    }
+  }
+
+  persistAll();
+  renderTabs();
+  renderTabsDropdown();
+  doSync(true).then(function(){
+    if(isDropdownOpen()) renderTabsDropdown();
+  });
+}
+
+tabsEl.addEventListener('click', function(e){
+  var addEl = e.target.closest('[data-action="add"]');
+  if(addEl){ e.preventDefault(); addTab(); return; }
+  var tabEl = e.target.closest('[data-tab-id]');
+  if(!tabEl) return;
+  var id = parseInt(tabEl.getAttribute('data-tab-id'), 10);
+  if(isNaN(id)) return;
+  e.preventDefault();
+  if(e.target.closest('[data-action="close"]')){ closeTab(id); return; }
+  if(id !== activeTabId){ setActiveTab(id); return; }
+  if(isReadOnlyView) return;
+  renameTab(id);
+});
 
 function applyWrap(){
   if(wrapMode){
@@ -958,12 +1084,12 @@ function applyReadOnlyMode(){
 
 function updateGroupSeparators(){
   var groups = toolbar.querySelectorAll('.btn-group');
-  var lastVisible = null;
+  var last = null;
   for(var i=0;i<groups.length;i++){
     groups[i].classList.remove('last-visible');
-    if(groups[i].offsetParent !== null) lastVisible = groups[i];
+    if(groups[i].offsetParent !== null) last = groups[i];
   }
-  if(lastVisible) lastVisible.classList.add('last-visible');
+  if(last) last.classList.add('last-visible');
 }
 
 function updateStats(){
@@ -972,7 +1098,7 @@ function updateStats(){
   var n = v.replace(/\s/g,'').length;
   var l = v === '' ? 0 : v.split('\n').length;
   var prefix = isReadOnlyView ? '<span class="ro-badge">READ ONLY</span> ' : '';
-  statsEl.innerHTML = prefix + 'c:' + c + ' w:' + n + ' l:' + l;
+  statsEl.innerHTML = prefix + 'Characters: '+c+'   Non-space: '+n+'   Lines: '+l;
 }
 
 var saveTimer = null;
@@ -983,28 +1109,20 @@ function scheduleSave(){
 function flush(){
   if(saveTimer){ clearTimeout(saveTimer); saveTimer = null; }
   saveCurrentContentToTab();
-  saveTabsData();
+  persistAll();
 }
 
 function syncRunDomToActive(){
   var activeFrame = frameByTabId[activeTabId] || null;
   var anyRun = Object.keys(frameByTabId).length > 0;
-
-  if(!anyRun){
-    document.body.classList.remove('run-active');
-  } else {
-    if(activeFrame){
-      document.body.classList.add('run-active');
-    } else {
-      document.body.classList.remove('run-active');
-    }
-  }
+  if(!anyRun) document.body.classList.remove('run-active');
+  else if(activeFrame) document.body.classList.add('run-active');
+  else document.body.classList.remove('run-active');
 
   var all = runFrameWrap.querySelectorAll('iframe.run-frame');
   for(var i=0;i<all.length;i++){
-    var f = all[i];
-    if(f === activeFrame) f.classList.add('run-visible');
-    else f.classList.remove('run-visible');
+    if(all[i] === activeFrame) all[i].classList.add('run-visible');
+    else all[i].classList.remove('run-visible');
   }
   updateRunFullscreenUi();
 }
@@ -1012,7 +1130,7 @@ function syncRunDomToActive(){
 function createRunFrameFor(tabId){
   var f = document.createElement('iframe');
   f.className = 'run-frame';
-  f.setAttribute('title', 'HTML preview');
+  f.setAttribute('title','HTML preview');
   var sb = 'allow-scripts allow-forms allow-modals allow-popups allow-downloads';
   if(!shareLoaded) sb += ' allow-same-origin';
   f.setAttribute('sandbox', sb);
@@ -1021,54 +1139,43 @@ function createRunFrameFor(tabId){
   frameByTabId[tabId] = f;
   return f;
 }
-
 function destroyRunFrameFor(tabId){
   var f = frameByTabId[tabId];
   if(!f) return;
-  try {
+  try{
     f.removeAttribute('srcdoc');
     f.src = 'about:blank';
     if(f.parentNode) f.parentNode.removeChild(f);
-  } catch(e){}
+  }catch(e){}
   delete frameByTabId[tabId];
 }
 
 function setActiveTab(id){
   if(id === activeTabId){
-    var t = findTab(id);
-    if(t) ta.value = t.content;
-    updateStats();
-    updateRunButtonState();
-    syncRunDomToActive();
-    renderTabs();
+    var t0 = findLocal(id);
+    if(t0) ta.value = t0.content;
+    updateStats(); updateRunButtonState(); syncRunDomToActive(); renderTabs();
     return;
   }
   saveCurrentContentToTab();
-  activeTabId = id;
-  var tab = findTab(id);
+  var tab = findLocal(id);
   if(!tab) return;
+  activeTabId = id;
   ta.value = tab.content;
-  updateStats();
-  updateRunButtonState();
-  saveTabsData();
-  renderTabs();
-  syncRunDomToActive();
+  updateStats(); updateRunButtonState();
+  persistAll(); renderTabs(); syncRunDomToActive();
   ta.focus({preventScroll:true});
-  scheduleSync();
 }
 
 function addTab(){
   if(isReadOnlyView) return;
   saveCurrentContentToTab();
-  var newTab = {id: tabCounter++, name: DEF_NAME, content: ''};
-  tabs.push(newTab);
-  activeTabId = newTab.id;
+  var nt = {id:tabCounter++, name:DEF_NAME, content:'', updatedAt:Date.now()};
+  allTabs.push(nt); tabs.push(nt); localTabIds.push(nt.id);
+  activeTabId = nt.id;
   ta.value = '';
-  updateStats();
-  updateRunButtonState();
-  saveTabsData();
-  renderTabs();
-  syncRunDomToActive();
+  updateStats(); updateRunButtonState();
+  persistAll(); renderTabs(); syncRunDomToActive();
   ta.focus({preventScroll:true});
   scheduleSync();
 }
@@ -1076,59 +1183,39 @@ function addTab(){
 function closeTab(id){
   if(isReadOnlyView) return;
   if(tabs.length <= 1) return;
-  var idx = -1;
-  for(var i=0;i<tabs.length;i++) if(tabs[i].id === id){ idx = i; break; }
+  var idx = tabs.findIndex(function(t){ return t.id === id; });
   if(idx < 0) return;
-
   destroyRunFrameFor(id);
-
   var wasActive = (id === activeTabId);
-  tabs.splice(idx, 1);
+  tabs.splice(idx,1);
+  var li = localTabIds.indexOf(id);
+  if(li >= 0) localTabIds.splice(li,1);
   if(wasActive){
-    var newIdx = Math.min(idx, tabs.length - 1);
-    activeTabId = tabs[newIdx].id;
-    ta.value = tabs[newIdx].content;
-    updateStats();
-    updateRunButtonState();
+    activeTabId = tabs[Math.min(idx, tabs.length-1)].id;
+    ta.value = findLocal(activeTabId).content;
+    updateStats(); updateRunButtonState();
   }
-  saveTabsData();
-  renderTabs();
-  syncRunDomToActive();
+  persistAll(); renderTabs(); syncRunDomToActive();
   if(wasActive) ta.focus({preventScroll:true});
   scheduleSync();
 }
 
 function renameTab(id){
   if(isReadOnlyView) return;
-  var tab = findTab(id);
+  var tab = findLocal(id);
   if(!tab) return;
   var input = null;
-  try { input = window.prompt('Rename tab:', tab.name); } catch(e){}
+  try{ input = window.prompt('Rename tab:', tab.name); }catch(e){}
   if(input === null) return;
   input = String(input).trim();
   if(!input) return;
   tab.name = input;
-  saveTabsData();
-  renderTabs();
-  scheduleSync();
+  tab.updatedAt = Date.now();
+  persistAll(); renderTabs(); scheduleSync();
 }
 
-tabsEl.addEventListener('click', function(e){
-  var addEl = e.target.closest('[data-action="add"]');
-  if(addEl){ e.preventDefault(); addTab(); return; }
-  var tabEl = e.target.closest('[data-tab-id]');
-  if(!tabEl) return;
-  var id = parseInt(tabEl.getAttribute('data-tab-id'), 10);
-  if(isNaN(id)) return;
-  e.preventDefault();
-  if(e.target.closest('[data-action="close"]')){ closeTab(id); return; }
-  if(id !== activeTabId){ setActiveTab(id); return; }
-  if(isReadOnlyView) return;
-  renameTab(id);
-});
-
 function fallbackCopy(text){
-  try {
+  try{
     var tmp = document.createElement('textarea');
     tmp.value = text;
     tmp.style.position = 'fixed';
@@ -1137,24 +1224,19 @@ function fallbackCopy(text){
     tmp.select();
     document.execCommand('copy');
     document.body.removeChild(tmp);
-  } catch(e){}
+  }catch(e){}
 }
-
 function copyText(text){
   if(!text) return;
   if(navigator.clipboard && navigator.clipboard.writeText){
     navigator.clipboard.writeText(text).catch(function(){ fallbackCopy(text); });
-  } else {
-    fallbackCopy(text);
-  }
+  } else fallbackCopy(text);
 }
-
 function doCopy(){
   var s = ta.selectionStart, e = ta.selectionEnd;
   if(s === e) return;
-  copyText(ta.value.slice(s, e));
+  copyText(ta.value.slice(s,e));
 }
-
 function doCut(){
   if(isReadOnlyView) return;
   var s = ta.selectionStart, e = ta.selectionEnd;
@@ -1162,12 +1244,8 @@ function doCut(){
   doCopy();
   ta.setRangeText('', s, e, 'end');
   lastInputTime = Date.now();
-  updateStats();
-  updateRunButtonState();
-  scheduleSave();
-  scheduleSync();
+  updateStats(); updateRunButtonState(); scheduleSave(); scheduleSync();
 }
-
 function doPaste(){
   if(isReadOnlyView) return;
   if(navigator.clipboard && navigator.clipboard.readText){
@@ -1176,33 +1254,26 @@ function doPaste(){
       var s = ta.selectionStart, e = ta.selectionEnd;
       ta.setRangeText(text, s, e, 'end');
       lastInputTime = Date.now();
-      updateStats();
-      updateRunButtonState();
-      scheduleSave();
-      scheduleSync();
+      updateStats(); updateRunButtonState(); scheduleSave(); scheduleSync();
     }).catch(function(){});
   }
 }
 
 function b64EncodeUnicode(str){
-  try {
+  try{
     var bytes = new TextEncoder().encode(str);
     var bin = '';
     for(var i=0;i<bytes.length;i++) bin += String.fromCharCode(bytes[i]);
     return btoa(bin);
-  } catch(e){
-    return btoa(unescape(encodeURIComponent(str)));
-  }
+  }catch(e){ return btoa(unescape(encodeURIComponent(str))); }
 }
 function b64DecodeUnicode(str){
-  try {
+  try{
     var bin = atob(str);
     var bytes = new Uint8Array(bin.length);
     for(var i=0;i<bin.length;i++) bytes[i] = bin.charCodeAt(i);
     return new TextDecoder().decode(bytes);
-  } catch(e){
-    return decodeURIComponent(escape(atob(str)));
-  }
+  }catch(e){ return decodeURIComponent(escape(atob(str))); }
 }
 
 function updateShareModeButtons(){
@@ -1214,16 +1285,13 @@ function setShareMode(mode){
   lsSet(KEY_SHARE_MODE, shareMode);
   updateShareModeButtons();
 }
-
 function buildShareLink(){
-  var tab = findTab(activeTabId);
+  var tab = findLocal(activeTabId);
   if(!tab) return '';
-  var payload = { v:1, name: tab.name, mode: shareMode, content: tab.content };
-  var encoded = b64EncodeUnicode(JSON.stringify(payload));
+  var payload = {v:1, name:tab.name, mode:shareMode, content:tab.content};
   var base = location.href.split('#')[0].split('?')[0];
-  return base + '#share=' + encodeURIComponent(encoded);
+  return base + '#share=' + encodeURIComponent(b64EncodeUnicode(JSON.stringify(payload)));
 }
-
 function pulseWarn(el){
   if(!el) return;
   el.classList.remove('pulse-warn');
@@ -1231,12 +1299,10 @@ function pulseWarn(el){
   el.classList.add('pulse-warn');
   setTimeout(function(){ el.classList.remove('pulse-warn'); }, 1300);
 }
-
 function copyShareLink(){
   if(!binId || !binKey){
     showTransientMessage('Link unavailable: set up JSONBin sync first (click :|)');
-    pulseWarn(shareLinkBtn);
-    pulseWarn(syncBtn);
+    pulseWarn(shareLinkBtn); pulseWarn(syncBtn);
     return;
   }
   var link = buildShareLink();
@@ -1244,15 +1310,13 @@ function copyShareLink(){
   copyText(link);
   showTransientMessage('link copied');
 }
-
 function showTransientMessage(msg){
-  var prefix = isReadOnlyView ? '<span class="ro-badge">READ ONLY</span> ' : '';
-  statsEl.innerHTML = prefix + msg;
+  statsEl.innerHTML = (isReadOnlyView ? '<span class="ro-badge">READ ONLY</span> ' : '') + escHtml(msg);
   setTimeout(updateStats, 1600);
 }
 
 function buildRunHtmlFor(tabId){
-  var tab = findTab(tabId);
+  var tab = findInAll(tabId) || findLocal(tabId);
   if(!tab) return '';
   var name = tab.name || DEF_NAME;
   var content = tab.content != null ? tab.content : '';
@@ -1260,80 +1324,58 @@ function buildRunHtmlFor(tabId){
   if(/\.html?$/i.test(name)) return content;
   return wrapHtml(name, content);
 }
-
 function updateRunFullscreenUi(){
   var isFs = !!document.fullscreenElement;
   if(runFsIcon) runFsIcon.setAttribute('href', isFs ? '#i-exitfs' : '#i-fullscreen');
   if(runFsLabel) runFsLabel.textContent = isFs ? 'Exit' : 'Fullscreen';
   if(runFsBtn) runFsBtn.title = isFs ? 'Exit fullscreen' : 'Fullscreen';
 }
-
 function toggleRunFullscreen(){
   if(!document.fullscreenElement){
-    if(runFrameWrap.requestFullscreen){
-      runFrameWrap.requestFullscreen().then(updateRunFullscreenUi).catch(function(){});
-    }
-  } else {
-    if(document.exitFullscreen){
-      document.exitFullscreen().then(updateRunFullscreenUi).catch(function(){});
-    }
+    if(runFrameWrap.requestFullscreen) runFrameWrap.requestFullscreen().then(updateRunFullscreenUi).catch(function(){});
+  } else if(document.exitFullscreen){
+    document.exitFullscreen().then(updateRunFullscreenUi).catch(function(){});
   }
 }
-
 function enterRunMode(){
-  if(isRunTabActive()) return;
-  if(!canRunCurrent()) return;
+  if(isRunTabActive() || !canRunCurrent()) return;
   var html = buildRunHtmlFor(activeTabId);
   if(!html) return;
   createRunFrameFor(activeTabId);
   document.body.classList.add('run-active');
-  renderTabs();
-  syncRunDomToActive();
+  renderTabs(); syncRunDomToActive();
 }
-
 function exitRunMode(){
   if(!isRunTabActive()) return;
   destroyRunFrameFor(activeTabId);
-  if(document.fullscreenElement){ try { document.exitFullscreen(); } catch(e){} }
-  syncRunDomToActive();
-  renderTabs();
+  if(document.fullscreenElement){ try{ document.exitFullscreen(); }catch(e){} }
+  syncRunDomToActive(); renderTabs();
 }
-
 function reloadRun(){
   if(!isRunTabActive()) return;
   var f = frameByTabId[activeTabId];
   if(f) f.srcdoc = buildRunHtmlFor(activeTabId);
 }
-
-function toggleRun(){
-  if(isRunTabActive()){
-    exitRunMode();
-  } else {
-    enterRunMode();
-  }
-}
+function toggleRun(){ if(isRunTabActive()) exitRunMode(); else enterRunMode(); }
 
 function tryLoadSharedContent(){
   var hash = location.hash;
   if(!hash || hash.indexOf('#share=') !== 0) return false;
   var encoded = decodeURIComponent(hash.substring('#share='.length));
   if(!encoded) return false;
-  try {
+  try{
     var payload = JSON.parse(b64DecodeUnicode(encoded));
     if(!payload || typeof payload.content !== 'string') return false;
     isReadOnlyView = (payload.mode === 'read');
-    var newTab = { id: tabCounter++, name: payload.name || DEF_NAME, content: payload.content };
-    tabs.push(newTab);
-    activeTabId = newTab.id;
-    ta.value = newTab.content;
+    var nt = {id:tabCounter++, name:payload.name||DEF_NAME, content:payload.content, updatedAt:Date.now()};
+    allTabs.push(nt); tabs.push(nt); localTabIds.push(nt.id);
+    activeTabId = nt.id;
+    ta.value = nt.content;
     setShareMode(payload.mode === 'read' ? 'read' : 'edit');
-    saveTabsData();
-    applyReadOnlyMode();
-    renderTabs();
-    updateStats();
-    updateRunButtonState();
+    persistAll(); applyReadOnlyMode(); renderTabs();
+    updateStats(); updateRunButtonState();
     return true;
-  } catch(e){ return false; }
+  }catch(e){ return false; }
 }
 
 function updateShareLinkState(){
@@ -1341,133 +1383,199 @@ function updateShareLinkState(){
   shareLinkBtn.classList.toggle('warn-state', !ok);
   shareLinkBtn.title = ok ? 'Copy share link' : 'Unavailable: configure JSONBin sync first';
 }
-
 function computeSyncIcon(){
-  if(!binId || !binKey) return { icon: ':|', cls: 'local', text: 'Local only \u2014 credentials not set' };
-  if(syncState === 'loading') return { icon: ':|', cls: 'loading', text: 'Syncing\u2026' };
-  if(syncState === 'ok') return { icon: ':)', cls: 'ok', text: 'Synced with JSONBin' };
-  if(syncState === 'err') return { icon: ':(', cls: 'err', text: 'Connected but sync failed' };
-  return { icon: ':|', cls: 'local', text: 'Ready \u2014 press Save & Sync' };
+  if(!binId || !binKey) return {icon:':|', cls:'local', text:'Local only \u2014 credentials not set'};
+  if(syncState === 'loading') return {icon:':|', cls:'loading', text:'Syncing\u2026'};
+  if(syncState === 'ok') return {icon:':)', cls:'ok', text:'Synced with JSONBin'};
+  if(syncState === 'err') return {icon:':(', cls:'err', text:'Connected but sync failed'};
+  return {icon:':|', cls:'local', text:'Ready'};
 }
-
 function renderSyncStatus(){
   var s = computeSyncIcon();
   syncBtn.textContent = s.icon;
   syncBtn.className = 'btn sync-btn edit-only ' + s.cls;
-  if(modalSmiley){
-    modalSmiley.textContent = s.icon;
-    modalSmiley.className = 'smiley ' + s.cls;
-  }
+  if(modalSmiley){ modalSmiley.textContent = s.icon; modalSmiley.className = 'smiley ' + s.cls; }
   if(modalStatusText) modalStatusText.textContent = s.text;
   updateShareLinkState();
 }
 
-function hashTabs(){
-  return JSON.stringify(tabs.map(function(t){ return [t.name, t.content]; }));
+function unionIds(a,b){
+  var out = [], seen = {};
+  a.concat(b).forEach(function(id){
+    id = parseInt(id,10);
+    if(isNaN(id) || seen[id]) return;
+    seen[id] = true; out.push(id);
+  });
+  return out;
+}
+
+function mergeTabs(localList, remoteList){
+  var byId = {}, order = [];
+  remoteList.forEach(function(rt){
+    var id = parseInt(rt.id,10);
+    if(isNaN(id) || deletedIds.indexOf(id) >= 0) return;
+    if(!byId[id]) order.push(id);
+    byId[id] = {id:id, name:rt.name||DEF_NAME, content:rt.content||'', updatedAt:rt.updatedAt||0};
+  });
+  localList.forEach(function(lt){
+    var id = parseInt(lt.id,10);
+    if(isNaN(id) || deletedIds.indexOf(id) >= 0) return;
+    var ex = byId[id];
+    var upd = lt.updatedAt || 0;
+    if(!ex){
+      byId[id] = {id:id, name:lt.name||DEF_NAME, content:lt.content||'', updatedAt:upd};
+      order.push(id);
+    } else if(upd > ex.updatedAt){
+      byId[id] = {id:id, name:lt.name||DEF_NAME, content:lt.content||'', updatedAt:upd};
+    }
+  });
+  return order.map(function(id){ return byId[id]; });
+}
+
+function parseRemote(record){
+  var remoteTabs = [], remoteNext = 0, remoteDeleted = [];
+  if(!record) return {tabs:remoteTabs, next:remoteNext, deleted:remoteDeleted};
+  if(Array.isArray(record.deletedIds)) remoteDeleted = record.deletedIds;
+  if(Array.isArray(record.allTabs)){
+    remoteTabs = record.allTabs;
+    remoteNext = record.nextTabId || 0;
+  } else if(Array.isArray(record.tabs)){
+    remoteTabs = record.tabs.map(function(t){
+      return {id:t.id, name:t.name||DEF_NAME, content:t.content||'', updatedAt:0};
+    });
+    remoteNext = record.nextTabId || 0;
+  }
+  return {tabs:remoteTabs, next:remoteNext, deleted:remoteDeleted};
+}
+
+function reconcileLocal(){
+  localTabIds = localTabIds.filter(function(id){
+    return deletedIds.indexOf(id) < 0 && !!findInAll(id);
+  });
+  var next = [];
+  localTabIds.forEach(function(id){
+    var t = findInAll(id);
+    if(t && next.indexOf(t) < 0) next.push(t);
+  });
+  tabs = next;
+
+  if(tabs.length === 0){
+    var d = findInAll(allTabs.length ? allTabs[0].id : 0);
+    if(!d){
+      d = {id:tabCounter++, name:DEF_NAME, content:'', updatedAt:Date.now()};
+      allTabs.push(d);
+    }
+    tabs.push(d); localTabIds.push(d.id);
+    activeTabId = d.id;
+  }
+  if(!findLocal(activeTabId)) activeTabId = tabs[0].id;
 }
 
 function scheduleSync(){
-  if(!binId || !binKey) return;
-  if(isReadOnlyView) return;
+  if(!binId || !binKey || isReadOnlyView) return;
   if(syncTimer) clearTimeout(syncTimer);
-  syncTimer = setTimeout(function(){
-    if(hashTabs() === lastSyncedHash) return;
-    doSync();
-  }, 2000);
+  syncTimer = setTimeout(function(){ doSync(false); }, 1200);
 }
 
-function doSync(){
-  if(!binId || !binKey){ renderSyncStatus(); return Promise.resolve(false); }
+function doSync(silent){
+  if(!binId || !binKey){ if(!silent) renderSyncStatus(); return Promise.resolve(false); }
   if(isReadOnlyView) return Promise.resolve(false);
+  if(syncInFlight) return Promise.resolve(false);
+  syncInFlight = true;
+
   saveCurrentContentToTab();
-  saveTabsData();
+  if(!silent){ syncState = 'loading'; renderSyncStatus(); }
 
-  syncState = 'loading';
-  renderSyncStatus();
-
-  var payload = {
-    v: 1,
-    updatedAt: Date.now(),
-    tabs: tabs.map(function(t){ return { id:t.id, name:t.name, content:t.content }; }),
-    activeTabId: activeTabId
-  };
-
-  var isNew = !binId;
-  var url = isNew ? (JSONBIN_BASE + '/b') : (JSONBIN_BASE + '/b/' + encodeURIComponent(binId));
-  var method = isNew ? 'POST' : 'PUT';
-  var headers = {
-    'Content-Type': 'application/json',
-    'X-Master-Key': binKey
-  };
-  if(isNew){
-    headers['X-Bin-Private'] = 'true';
-    headers['X-Bin-Name'] = 'mypad';
-  } else {
-    headers['X-Bin-Versioning'] = 'false';
-  }
-
-  return fetch(url, { method: method, headers: headers, body: JSON.stringify(payload) })
+  var getUrl = JSONBIN_BASE + '/b/' + encodeURIComponent(binId) + '/latest';
+  return fetch(getUrl, {headers:{'X-Master-Key':binKey}})
     .then(function(res){
-      if(!res.ok) throw new Error('HTTP ' + res.status);
-      return res.json().catch(function(){ return null; });
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      return res.json();
     })
     .then(function(data){
-      if(isNew && data && data.metadata && data.metadata.id){
-        binId = data.metadata.id;
-        lsSet(KEY_BIN_ID, binId);
-        if(binIdEl) binIdEl.value = binId;
-      }
+      var rec = data && data.record ? data.record : data;
+      var r = parseRemote(rec);
+
+      deletedIds = unionIds(deletedIds, r.deleted);
+      allTabs = mergeTabs(allTabs, r.tabs);
+
+      var maxId = 0;
+      allTabs.forEach(function(t){ if(t.id > maxId) maxId = t.id; });
+      deletedIds.forEach(function(id){ if(id > maxId) maxId = id; });
+      if(r.next > maxId) maxId = r.next;
+      if(tabCounter <= maxId) tabCounter = maxId + 1;
+
+      reconcileLocal();
+
+      var cur = findLocal(activeTabId);
+      if(cur && document.activeElement !== ta) ta.value = cur.content;
+
+      var payload = {
+        v: 3,
+        updatedAt: Date.now(),
+        nextTabId: tabCounter,
+        allTabs: allTabs,
+        deletedIds: deletedIds
+      };
+      return fetch(JSONBIN_BASE + '/b/' + encodeURIComponent(binId), {
+        method:'PUT',
+        headers:{'Content-Type':'application/json','X-Master-Key':binKey,'X-Bin-Versioning':'false'},
+        body: JSON.stringify(payload)
+      }).then(function(res){
+        if(!res.ok) throw new Error('HTTP '+res.status);
+        return res.json().catch(function(){ return null; });
+      });
+    })
+    .then(function(){
+      syncInFlight = false;
       syncState = 'ok';
-      lastSyncedHash = hashTabs();
-      renderSyncStatus();
+      persistAll();
+      updateStats(); updateRunButtonState();
+      renderTabs();
+      syncRunDomToActive();
+      if(!silent) renderSyncStatus();
+      if(isDropdownOpen()) renderTabsDropdown();
       return true;
     })
     .catch(function(){
+      syncInFlight = false;
       syncState = 'err';
-      renderSyncStatus();
+      if(!silent) renderSyncStatus();
       return false;
     });
 }
 
 function pullFromBin(){
   if(!binId || !binKey) return Promise.resolve(false);
-  syncState = 'loading';
-  renderSyncStatus();
-  var url = JSONBIN_BASE + '/b/' + encodeURIComponent(binId) + '/latest';
-  return fetch(url, { headers: { 'X-Master-Key': binKey } })
+  syncState = 'loading'; renderSyncStatus();
+  return fetch(JSONBIN_BASE + '/b/' + encodeURIComponent(binId) + '/latest', {headers:{'X-Master-Key':binKey}})
     .then(function(res){
-      if(!res.ok) throw new Error('HTTP ' + res.status);
+      if(!res.ok) throw new Error('HTTP '+res.status);
       return res.json();
     })
     .then(function(data){
-      var record = data && data.record ? data.record : data;
-      if(!record || !Array.isArray(record.tabs)) throw new Error('Bad data');
-      var newTabs = record.tabs.map(function(t){
-        return { id: tabCounter++, name: t.name || DEF_NAME, content: t.content || '' };
-      });
-      if(newTabs.length === 0) throw new Error('Empty remote');
+      var rec = data && data.record ? data.record : data;
+      var r = parseRemote(rec);
+      deletedIds = unionIds(deletedIds, r.deleted);
+      allTabs = mergeTabs(allTabs, r.tabs);
+      var maxId = 0;
+      allTabs.forEach(function(t){ if(t.id > maxId) maxId = t.id; });
+      if(r.next > maxId) maxId = r.next;
+      if(tabCounter <= maxId) tabCounter = maxId + 1;
+
       Object.keys(frameByTabId).forEach(function(k){ destroyRunFrameFor(parseInt(k,10)); });
       document.body.classList.remove('run-active');
-      tabs = newTabs;
-      activeTabId = tabs[0].id;
-      ta.value = tabs[0].content;
-      updateStats();
-      updateRunButtonState();
-      saveTabsData();
-      renderTabs();
-      syncRunDomToActive();
+
+      reconcileLocal();
+      ta.value = findLocal(activeTabId).content;
       syncState = 'ok';
-      lastSyncedHash = hashTabs();
-      renderSyncStatus();
+      persistAll(); renderTabs(); syncRunDomToActive();
+      updateStats(); updateRunButtonState(); renderSyncStatus();
+      if(isDropdownOpen()) renderTabsDropdown();
       return true;
     })
-    .catch(function(){
-      syncState = 'err';
-      renderSyncStatus();
-      return false;
-    });
+    .catch(function(){ syncState = 'err'; renderSyncStatus(); return false; });
 }
-
 
 function openSyncModal(){
   binIdEl.value = binId;
@@ -1477,37 +1585,26 @@ function openSyncModal(){
   setTimeout(function(){ binIdEl.focus(); }, 50);
 }
 function closeSyncModal(){
-  binId = binIdEl.value.trim();
+  binId  = binIdEl.value.trim();
   binKey = binKeyEl.value.trim();
   lsSet(KEY_BIN_ID, binId);
   lsSet(KEY_BIN_KEY, binKey);
-  if(!binId || !binKey){
-    syncState = 'local';
-  } else if(syncState === 'local'){
-    syncState = 'idle';
-  }
+  if(!binId || !binKey) syncState = 'local';
+  else if(syncState === 'local') syncState = 'idle';
   renderSyncStatus();
   syncModal.hidden = true;
 }
 
-syncModal.addEventListener('click', function(e){
-  if(e.target === syncModal) closeSyncModal();
-});
+syncModal.addEventListener('click', function(e){ if(e.target === syncModal) closeSyncModal(); });
 modalClose.addEventListener('click', closeSyncModal);
-
 modalSyncBtn.addEventListener('click', function(){
-  binId = binIdEl.value.trim();
-  binKey = binKeyEl.value.trim();
-  lsSet(KEY_BIN_ID, binId);
-  lsSet(KEY_BIN_KEY, binKey);
-  doSync();
+  binId = binIdEl.value.trim(); binKey = binKeyEl.value.trim();
+  lsSet(KEY_BIN_ID, binId); lsSet(KEY_BIN_KEY, binKey);
+  doSync(false);
 });
-
 modalPullBtn.addEventListener('click', function(){
-  binId = binIdEl.value.trim();
-  binKey = binKeyEl.value.trim();
-  lsSet(KEY_BIN_ID, binId);
-  lsSet(KEY_BIN_KEY, binKey);
+  binId = binIdEl.value.trim(); binKey = binKeyEl.value.trim();
+  lsSet(KEY_BIN_ID, binId); lsSet(KEY_BIN_KEY, binKey);
   pullFromBin();
 });
 
@@ -1517,9 +1614,7 @@ runBackToCode.addEventListener('click', exitRunMode);
 document.addEventListener('fullscreenchange', updateRunFullscreenUi);
 
 document.querySelectorAll('[data-copy-text]').forEach(function(btn){
-  btn.addEventListener('click', function(){
-    copyText(btn.getAttribute('data-copy-text'));
-  });
+  btn.addEventListener('click', function(){ copyText(btn.getAttribute('data-copy-text')); });
 });
 
 var MIME = {
@@ -1533,34 +1628,32 @@ function wrapHtml(name,text){
   return '<!doctype html>\n<html lang="en">\n<meta charset="utf-8">\n<title>'+t+'</title>\n'+
     '<style>html,body{margin:0;background:#fff;color:#000}'+
     'pre{margin:0;padding:16px;white-space:pre-wrap;word-wrap:break-word;'+
-    'font:16px/1.45 "MS Sans Serif",Tahoma,monospace}</style>\n'+
+    'font:14px/1.45 "MS Sans Serif",Tahoma,monospace}</style>\n'+
     '<pre id="n">'+esc(text)+'</pre>\n';
 }
 
 function saveAs(){
   if(isReadOnlyView) return;
   flush();
-  var cur = findTab(activeTabId);
+  var cur = findLocal(activeTabId);
   if(!cur) return;
   var def = cur.name || DEF_NAME;
   var input = null;
-  try { input = window.prompt('Save file as (filename with extension):', def); }
-  catch(e){ input = def; }
+  try{ input = window.prompt('Save file as (filename with extension):', def); }catch(e){ input = def; }
   if(input === null) return;
   var fn = (input || '').trim() || def;
   if(!/\.[a-z0-9]+$/i.test(fn)) fn += '.html';
   cur.name = fn;
-  saveTabsData();
-  renderTabs();
+  cur.updatedAt = Date.now();
+  persistAll(); renderTabs(); scheduleSync();
 
-  var ext  = fn.split('.').pop().toLowerCase();
+  var ext = fn.split('.').pop().toLowerCase();
   var body = (ext === 'html' || ext === 'htm') ? wrapHtml(fn, ta.value) : ta.value;
   var mime = (MIME[ext] || 'text/plain') + ';charset=utf-8';
-
-  try {
-    var blob = new Blob([body], {type: mime});
-    var url  = URL.createObjectURL(blob);
-    var a    = document.createElement('a');
+  try{
+    var blob = new Blob([body], {type:mime});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
     a.href = url; a.download = fn; a.rel = 'noopener';
     document.body.appendChild(a); a.click();
     setTimeout(function(){
@@ -1568,15 +1661,14 @@ function saveAs(){
       try{ URL.revokeObjectURL(url); }catch(e){}
     }, 30000);
     return;
-  } catch(e){}
-
-  try {
-    var dataUrl = 'data:' + mime + ',' + encodeURIComponent(body);
+  }catch(e){}
+  try{
     var a2 = document.createElement('a');
-    a2.href = dataUrl; a2.download = fn;
+    a2.href = 'data:'+mime+','+encodeURIComponent(body);
+    a2.download = fn;
     document.body.appendChild(a2); a2.click();
     setTimeout(function(){ try{ document.body.removeChild(a2); }catch(e){} }, 30000);
-  } catch(e){}
+  }catch(e){}
 }
 
 function openFile(){
@@ -1588,27 +1680,23 @@ function openFile(){
 function indent(wantUntab){
   if(isReadOnlyView) return;
   ta.focus({preventScroll:true});
-  var val    = ta.value;
-  var selA   = Math.min(ta.selectionStart, ta.selectionEnd);
-  var selB   = Math.max(ta.selectionStart, ta.selectionEnd);
-  var noSel  = (selA === selB);
+  var val = ta.value;
+  var selA = Math.min(ta.selectionStart, ta.selectionEnd);
+  var selB = Math.max(ta.selectionStart, ta.selectionEnd);
+  var noSel = (selA === selB);
 
   var lineStartA = selA;
-  while(lineStartA > 0 && val.charAt(lineStartA - 1) !== '\n') lineStartA--;
-
+  while(lineStartA > 0 && val.charAt(lineStartA-1) !== '\n') lineStartA--;
   var lineEndB = selB;
   while(lineEndB < val.length && val.charAt(lineEndB) !== '\n') lineEndB++;
 
-  var block = val.slice(lineStartA, lineEndB);
-  var lines = block.split('\n');
-  var newLines = [];
-  var delta = 0;
-
-  for(var i = 0; i < lines.length; i++){
+  var lines = val.slice(lineStartA, lineEndB).split('\n');
+  var newLines = [], delta = 0;
+  for(var i=0;i<lines.length;i++){
     var line = lines[i];
     if(wantUntab){
-      var m   = line.match(/^[ ]*/);
-      var sp  = m ? m[0].length : 0;
+      var m = line.match(/^[ ]*/);
+      var sp = m ? m[0].length : 0;
       var rem = Math.min(sp, INDENT.length);
       if(rem > 0){ newLines.push(line.slice(rem)); delta -= rem; }
       else newLines.push(line);
@@ -1617,30 +1705,20 @@ function indent(wantUntab){
       delta += INDENT.length;
     }
   }
-
-  var newBlock = newLines.join('\n');
-  ta.setRangeText(newBlock, lineStartA, lineEndB, 'end');
-
+  ta.setRangeText(newLines.join('\n'), lineStartA, lineEndB, 'end');
   if(noSel){
     var newCur;
     if(wantUntab){
-      var m0  = lines[0].match(/^[ ]*/);
+      var m0 = lines[0].match(/^[ ]*/);
       var sp0 = m0 ? m0[0].length : 0;
-      var rem0 = Math.min(sp0, INDENT.length);
-      newCur = Math.max(lineStartA, selA - rem0);
-    } else {
-      newCur = selA + INDENT.length;
-    }
+      newCur = Math.max(lineStartA, selA - Math.min(sp0, INDENT.length));
+    } else newCur = selA + INDENT.length;
     ta.setSelectionRange(newCur, newCur);
   } else {
     ta.setSelectionRange(lineStartA, lineEndB + delta);
   }
-
   lastInputTime = Date.now();
-  updateStats();
-  updateRunButtonState();
-  scheduleSave();
-  scheduleSync();
+  updateStats(); updateRunButtonState(); scheduleSave(); scheduleSync();
 }
 
 function toggleWrap(){
@@ -1648,38 +1726,34 @@ function toggleWrap(){
   lsSet(KEY_WRAP, wrapMode ? '1' : '0');
   applyWrap();
 }
-
 function getLineHeight(){
   var lh = parseFloat(getComputedStyle(ta).lineHeight);
   return lh > 0 ? lh : 24;
 }
-
 function snapScroll(){
   if(Date.now() - lastInputTime < 300) return;
   var lh = getLineHeight();
   var snapped = Math.round(ta.scrollTop / lh) * lh;
   if(Math.abs(ta.scrollTop - snapped) > 0.5) ta.scrollTop = snapped;
 }
-
 ta.addEventListener('scroll', function(){
   if(scrollSnapTimer) clearTimeout(scrollSnapTimer);
   scrollSnapTimer = setTimeout(snapScroll, 120);
 });
-
 ta.addEventListener('wheel', function(e){
   if(Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
   if(e.deltaY === 0) return;
   e.preventDefault();
   var lh = getLineHeight();
   var dir = e.deltaY > 0 ? 1 : -1;
-  var lines = Math.max(1, Math.round(Math.abs(e.deltaY) / 40));
-  ta.scrollTop = ta.scrollTop + dir * lines * lh;
+  var lines = Math.max(1, Math.round(Math.abs(e.deltaY)/40));
+  ta.scrollTop = ta.scrollTop + dir*lines*lh;
 }, {passive:false});
 
 function pageScroll(dir){
   var lh = getLineHeight();
-  var lines = Math.max(1, Math.floor((ta.clientHeight - 30) / lh));
-  ta.scrollTop = ta.scrollTop + dir * lines * lh;
+  var lines = Math.max(1, Math.floor((ta.clientHeight-30)/lh));
+  ta.scrollTop = ta.scrollTop + dir*lines*lh;
 }
 
 function doAction(id){
@@ -1692,8 +1766,6 @@ function doAction(id){
   else if(id === 'tab') indent(false);
   else if(id === 'untab') indent(true);
   else if(id === 'wrap') toggleWrap();
-  else if(id === 'pgup') pageScroll(-1);
-  else if(id === 'pgdn') pageScroll(1);
   else if(id === 'share') copyShareLink();
   else if(id === 'sync-open') openSyncModal();
   else if(id === 'run') toggleRun();
@@ -1716,10 +1788,7 @@ toolbar.addEventListener('click', function(e){
 
 ta.addEventListener('input', function(){
   lastInputTime = Date.now();
-  updateStats();
-  updateRunButtonState();
-  scheduleSave();
-  scheduleSync();
+  updateStats(); updateRunButtonState(); scheduleSave(); scheduleSync();
 });
 ta.addEventListener('select', updateStats);
 ta.addEventListener('click', updateStats);
@@ -1727,27 +1796,17 @@ ta.addEventListener('keyup', updateStats);
 
 ta.addEventListener('keydown', function(e){
   var ctrl = e.ctrlKey || e.metaKey;
-
   if(ctrl && e.key === 'Enter'){
     e.preventDefault();
     if(!isRunTabActive() && !canRunCurrent()) return;
-    toggleRun();
-    return;
+    toggleRun(); return;
   }
-
   if(isReadOnlyView){
-    if(ctrl && (
-      e.key === 's' || e.key === 'S' ||
-      e.key === 'o' || e.key === 'O' ||
-      e.key === 'x' || e.key === 'X' ||
-      e.key === 'v' || e.key === 'V'
-    )){
-      e.preventDefault();
-      showTransientMessage('Read-only mode');
+    if(ctrl && ['s','S','o','O','x','X','v','V'].indexOf(e.key) >= 0){
+      e.preventDefault(); showTransientMessage('Read-only mode');
     }
     return;
   }
-
   if(ctrl && !e.shiftKey && (e.key === 's' || e.key === 'S')){ e.preventDefault(); saveAs(); return; }
   if(ctrl && (e.key === 'o' || e.key === 'O')){ e.preventDefault(); openFile(); return; }
   if(ctrl && (e.key === 'x' || e.key === 'X')){ e.preventDefault(); doCut(); return; }
@@ -1756,7 +1815,6 @@ ta.addEventListener('keydown', function(e){
     return;
   }
   if(ctrl && (e.key === 'v' || e.key === 'V')){ e.preventDefault(); doPaste(); return; }
-
   if(e.key === 'Tab'){ e.preventDefault(); indent(e.shiftKey); return; }
   if(e.key === 'PageUp'){ e.preventDefault(); pageScroll(-1); return; }
   if(e.key === 'PageDown'){ e.preventDefault(); pageScroll(1); return; }
@@ -1765,42 +1823,33 @@ ta.addEventListener('keydown', function(e){
     var pos = ta.selectionStart;
     var val = ta.value;
     var lineStart = pos;
-    while(lineStart > 0 && val.charAt(lineStart - 1) !== '\n') lineStart--;
+    while(lineStart > 0 && val.charAt(lineStart-1) !== '\n') lineStart--;
     var currentLine = val.slice(lineStart, pos);
-
-    var indentMatch = currentLine.match(/^([ \t]*)/);
-    var ind = indentMatch ? indentMatch[1] : '';
+    var im = currentLine.match(/^([ \t]*)/);
+    var ind = im ? im[1] : '';
     var cont = '';
-
-    var listMatch = currentLine.match(/^([ \t]*)(-|\*|\+|(\d+)\.)\s/);
-    if(listMatch){
-      ind = listMatch[1];
-      var marker = listMatch[2];
-      if(/^\d+\.$/.test(marker)){
-        var num = parseInt(marker, 10);
-        cont = ind + (num + 1) + '. ';
-      } else {
-        cont = ind + marker + ' ';
-      }
-    } else if(ind){
-      cont = ind;
-    }
+    var lm = currentLine.match(/^([ \t]*)(-|\*|\+|(\d+)\.)\s/);
+    if(lm){
+      ind = lm[1];
+      var marker = lm[2];
+      if(/^\d+\.$/.test(marker)) cont = ind + (parseInt(marker,10)+1) + '. ';
+      else cont = ind + marker + ' ';
+    } else if(ind) cont = ind;
 
     e.preventDefault();
-    ta.setRangeText('\n' + cont, pos, ta.selectionEnd, 'end');
+    ta.setRangeText('\n'+cont, pos, ta.selectionEnd, 'end');
     lastInputTime = Date.now();
-    updateStats();
-    updateRunButtonState();
-    scheduleSave();
-    scheduleSync();
+    updateStats(); updateRunButtonState(); scheduleSave(); scheduleSync();
   }
 });
 
 document.addEventListener('keydown', function(e){
-  if(e.key === 'Escape' && isRunTabActive()){
-    if(document.fullscreenElement) return;
-    e.preventDefault();
-    exitRunMode();
+  if(e.key === 'Escape'){
+    if(isDropdownOpen()){ e.preventDefault(); closeDropdown(); return; }
+    if(isRunTabActive()){
+      if(document.fullscreenElement) return;
+      e.preventDefault(); exitRunMode();
+    }
   }
 });
 
@@ -1816,16 +1865,13 @@ fileEl.addEventListener('change', function(){
       if(m) t = unesc(m[1]);
     }
     saveCurrentContentToTab();
-    var newTab = {id: tabCounter++, name: f.name, content: t};
-    tabs.push(newTab);
-    activeTabId = newTab.id;
+    var nt = {id:tabCounter++, name:f.name, content:t, updatedAt:Date.now()};
+    allTabs.push(nt); tabs.push(nt); localTabIds.push(nt.id);
+    activeTabId = nt.id;
     ta.value = t;
     ta.setSelectionRange(t.length, t.length);
-    updateStats();
-    updateRunButtonState();
-    saveTabsData();
-    renderTabs();
-    syncRunDomToActive();
+    updateStats(); updateRunButtonState();
+    persistAll(); renderTabs(); syncRunDomToActive();
     ta.focus({preventScroll:true});
     scheduleSync();
   };
@@ -1834,72 +1880,62 @@ fileEl.addEventListener('change', function(){
 
 window.addEventListener('beforeunload', flush);
 window.addEventListener('pagehide', flush);
-document.addEventListener('visibilitychange', function(){ if(document.hidden) flush(); });
+document.addEventListener('visibilitychange', function(){
+  if(document.hidden) flush();
+  else if(binId && binKey && !isReadOnlyView) doSync(true);
+});
 
 function icon(size){
   var c = document.createElement('canvas');
   c.width = c.height = size;
   var x = c.getContext('2d');
-  x.fillStyle = '#1a1a1a';
-  x.fillRect(0, 0, size, size);
-  x.fillStyle = '#7ee787';
-  x.font = 'bold ' + Math.round(size * 0.32) + 'px system-ui,Roboto,monospace';
+  x.fillStyle = '#1f1f1f';
+  x.fillRect(0,0,size,size);
+  x.fillStyle = '#ffffff';
+  x.font = 'bold '+Math.round(size*0.32)+'px system-ui,Roboto,monospace';
   x.textAlign = 'center';
   x.textBaseline = 'middle';
-  x.fillText('>_', size / 2, size / 2);
+  x.fillText('>_', size/2, size/2);
   return c.toDataURL('image/png');
 }
 
-try {
+try{
   var i192 = icon(192), i512 = icon(512), i180 = icon(180), i64 = icon(64);
   var base = location.href.split('#')[0].split('?')[0];
-  var scope = base.replace(/[^/]*$/, '');
   var manifest = {
-    name: 'MyPad',
-    short_name: 'MyPad',
-    description: 'MyPad \u2014 dark notepad with JSONBin sync',
-    start_url: base,
-    scope: scope,
-    display: 'standalone',
-    orientation: 'any',
-    background_color: '#1a1a1a',
-    theme_color: '#1a1a1a',
-    icons: [
-      {src: i192, sizes: '192x192', type: 'image/png', purpose: 'any'},
-      {src: i512, sizes: '512x512', type: 'image/png', purpose: 'any'},
-      {src: i512, sizes: '512x512', type: 'image/png', purpose: 'maskable'}
+    name:'MyPad', short_name:'MyPad',
+    description:'MyPad \u2014 dark notepad with JSONBin sync',
+    start_url:base, scope:base.replace(/[^/]*$/,''),
+    display:'standalone', orientation:'any',
+    background_color:'#1f1f1f', theme_color:'#1f1f1f',
+    icons:[
+      {src:i192, sizes:'192x192', type:'image/png', purpose:'any'},
+      {src:i512, sizes:'512x512', type:'image/png', purpose:'any'},
+      {src:i512, sizes:'512x512', type:'image/png', purpose:'maskable'}
     ]
   };
-  var json = JSON.stringify(manifest);
-  var b64;
-  try {
-    var bytes = new TextEncoder().encode(json);
-    var bin = '';
-    for(var bi = 0; bi < bytes.length; bi++) bin += String.fromCharCode(bytes[bi]);
+  var json = JSON.stringify(manifest), b64;
+  try{
+    var bytes = new TextEncoder().encode(json), bin = '';
+    for(var bi=0;bi<bytes.length;bi++) bin += String.fromCharCode(bytes[bi]);
     b64 = btoa(bin);
-  } catch(e) {
-    b64 = btoa(unescape(encodeURIComponent(json)));
-  }
-  document.getElementById('mf').href = 'data:application/manifest+json;base64,' + b64;
-  var ap = document.createElement('link'); ap.rel = 'apple-touch-icon'; ap.href = i180; document.head.appendChild(ap);
-  var fv = document.createElement('link'); fv.rel = 'icon'; fv.href = i64; document.head.appendChild(fv);
-} catch(e) {}
+  }catch(e){ b64 = btoa(unescape(encodeURIComponent(json))); }
+  document.getElementById('mf').href = 'data:application/manifest+json;base64,'+b64;
+  var ap = document.createElement('link'); ap.rel='apple-touch-icon'; ap.href=i180; document.head.appendChild(ap);
+  var fv = document.createElement('link'); fv.rel='icon'; fv.href=i64; document.head.appendChild(fv);
+}catch(e){}
 
+loadData();
 applyWrap();
 setShareMode(shareMode);
 
 var hasCreds = !!(binId && binKey);
-var freshInstall = !lsGet(KEY_TABS) && !lsGet('asciinote.text');
+syncState = hasCreds ? 'loading' : 'local';
 
-if(hasCreds) syncState = 'loading';
-else syncState = 'local';
-
-var shareLoaded = false;
-if(tryLoadSharedContent()){
-  shareLoaded = true;
-} else {
-  var initialTab = findTab(activeTabId);
-  ta.value = initialTab ? initialTab.content : '';
+var shareLoaded = tryLoadSharedContent();
+if(!shareLoaded){
+  var it = findLocal(activeTabId);
+  ta.value = it ? it.content : '';
 }
 
 applyReadOnlyMode();
@@ -1911,22 +1947,20 @@ updateRunFullscreenUi();
 syncRunDomToActive();
 
 if(hasCreds && !isReadOnlyView && !shareLoaded){
-  if(freshInstall){
-    pullFromBin().then(function(ok){
-      if(!ok) doSync();
-    });
-  } else {
-    doSync();
-  }
+  doSync(false).then(function(ok){ if(!ok) pullFromBin(); });
 } else if(hasCreds && syncState === 'loading'){
   syncState = 'idle';
   renderSyncStatus();
 }
 
+setInterval(function(){
+  if(!binId || !binKey || isReadOnlyView || document.hidden) return;
+  doSync(true);
+}, 20000);
+
 if(document.fonts && document.fonts.ready){
   document.fonts.ready.then(function(){ updateStats(); });
 }
-
 setTimeout(function(){ ta.focus({preventScroll:true}); }, 100);
 
 })();
