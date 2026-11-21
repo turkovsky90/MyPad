@@ -1,181 +1,404 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
-<head><meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#1e1e1e" />
-  <title>MyPad Lite - A notepad in the browser</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='8' fill='%231e1e1e'/><path d='M18 20h28M18 32h28M18 44h18' stroke='%23d4d4d4' stroke-width='4' stroke-linecap='round'/></svg>" />
-  <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjogIk15UGFkIExpdGUiLCAic2hvcnRfbmFtZSI6ICJNeVBhZCIsICJzdGFydF91cmwiOiAiLiIsICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLCAiYmFja2dyb3VuZF9jb2xvciI6ICIjMWUxZTFlIiwgInRoZW1lX2NvbG9yIjogIiMxZTFlMWUiLCAiaWNvbnMiOiBbeyJzcmMiOiAiZGF0YTppbWFnZS9zdmcreG1sO3V0ZjgsPHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCA2NCA2NCc+PHJlY3Qgd2lkdGg9JzY0JyBoZWlnaHQ9JzY0JyByeD0nOCcgZmlsbD0nJTIzMWMxYzFlJy8+PHBhdGggZD0nTTE4IDIwaDI4TTE4IDMyaDI4TTE4IDQ0aDE4JyBzdHJva2U9JyUyM2Q0ZDRkNCcgc3Ryb2tlLXdpZHRoPSc0JyBzdHJva2UtbGluZWNhcD0ncm91bmQnLz48L3N2Zz4iLCAic2l6ZXMiOiAiMTkyeDE5MiIsICJ0eXBlIjogImltYWdlL3N2Zyt4bWwifV19" />
-  <style>
-@charset "utf-8";
-
-html, body { height: 100%; box-sizing: border-box; margin: 0px; background-color: #1e1e1e; color: #d4d4d4; }
-
-body { display: flex; flex-direction: column; }
-
-textarea { flex: 1; box-sizing: border-box; border: none; outline: none; resize: none; font-family: monospace; background-color: #000000; color: #d4d4d4; font-size: 16px; min-height: 0; }
-
-#textbox { border-bottom: 1px solid rgba(68, 68, 68, 0.5); background-color: #000000; width: 100%; padding: 0.5em; overflow-y: scroll; white-space: pre-wrap; }
-
-nav { box-sizing: border-box; width: 100%; padding: 0px 0.5em 0.3em; background-color: #252526; border-top: 1px solid rgba(68, 68, 68, 0.5); line-height: 1.25rem; color: #aaa; font-family: sans-serif; font-size: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; min-height: 2.5rem; }
-
-#stats { font-size: 85%; }
-
-label { font-size: 85%; vertical-align: middle; }
-
-#controls { display: flex; align-items: center; gap: 0.5em; flex-wrap: wrap; }
-
-/* Unified Button Style */
-button, #open a, #save a {
-  display: inline-block;
-  background-color: #3c3c3c;
-  color: #d4d4d4;
-  border: 1px solid rgba(85, 85, 85, 0.5);
-  border-radius: 3px;
-  padding: 0.45em 0.6em;
-  font-size: 85%;
-  font-family: sans-serif;
-  text-decoration: none;
-  cursor: pointer;
-  text-align: center;
-  line-height: 1.4;
-  box-sizing: border-box;
-  vertical-align: middle;
-  transition: background-color 0.2s, border-color 0.2s;
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1a1a1a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="MyPad">
+<title>MyPad</title>
+<link id="mf" rel="manifest">
+<style>
+:root{
+  --bg:#1f1f1f;
+  --tabs-bg:#151515;
+  --surface:#151515;
+  --pill:#2a2a2a;
+  --pill-hi:#333333;
+  --text:#d0d0d0;
+  --muted:#7a7a7a;
+  --accent:#ffffff;
+  --yellow:#e3b341;
+  --red:#ff7b72;
+  --line:#353535;
+  --fs-body:14px;
+  --fs-btn:12px;
+  --fs-small:11px;
+  --fs-tab:12px;
+}
+@media (max-width:600px){
+  body { transform: scale(1.375); transform-origin: top left; width: 72.73%; }
+  .toolbar{ column-gap:6px; row-gap:12px; }
+  .tabs-row{ column-gap:6px; row-gap:12px; }
+  .btn-group{ gap:6px; }
+  .btn{ gap:6px; }
+  .tab{ gap:6px; }
+  #stats{ gap:20px; }
+}
+@media (min-width:601px){
+  body { transform: scale(1.15); transform-origin: top left; width: 86.96%; }
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;overflow:hidden;overscroll-behavior:none}
+body{
+  display:flex;flex-direction:column;
+  background:var(--bg);
+  color:var(--text);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
+  font-size:var(--fs-body);
+  padding:0;
+  gap:0;
 }
 
-button:hover, #open a:hover, #save a:hover {
-  background-color: #4a4a4a;
-  border-color: rgba(119, 119, 119, 0.5);
+.tabs-row{
+  display:flex;
+  flex-wrap:wrap;
+  column-gap:4px;
+  row-gap:4px;
+  align-items:flex-end;
+  flex-shrink:0;
+  padding:6px 8px 0;
+  background:var(--tabs-bg);
+  border-bottom:1px solid var(--pill-hi);
+  position:relative;
+}
+.tabs-list{
+  display:flex;
+  flex-wrap:wrap;
+  column-gap:4px;
+  row-gap:4px;
+  align-items:flex-end;
+  flex:1 1 auto;
+  min-width:0;
+}
+.tabs-dropdown-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:26px;
+  height:26px;
+  min-height:26px;
+  background:var(--pill);
+  border:none;
+  border-radius:6px;
+  color:var(--text);
+  cursor:pointer;
+  touch-action:manipulation;
+  user-select:none;
+  -webkit-user-select:none;
+  -webkit-tap-highlight-color:transparent;
+  flex-shrink:0;
+  padding:0;
+  transition:background .15s;
+  margin-bottom:2px;
+}
+.tabs-dropdown-btn:hover{ background:var(--pill-hi); }
+.tabs-dropdown-btn svg{ width:13px; height:13px; display:block; pointer-events:none; }
+.tabs-dropdown{
+  position:absolute;
+  top:100%;
+  left:8px;
+  min-width:220px;
+  max-width:calc(100vw - 24px);
+  max-height:60vh;
+  overflow-y:auto;
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:7px;
+  box-shadow:0 6px 18px rgba(0,0,0,.55);
+  z-index:500;
+  display:none;
+  padding:4px 0;
+}
+.tabs-dropdown.show{ display:block; }
+.tabs-dropdown-header{
+  padding:7px 11px;
+  font-size:var(--fs-small);
+  color:var(--muted);
+  border-bottom:1px solid var(--line);
+  font-weight:600;
+}
+.tabs-dropdown-item{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  padding:8px 11px;
+  cursor:pointer;
+  color:var(--text);
+  font-size:var(--fs-tab);
+  transition:background .1s;
+}
+.tabs-dropdown-item:hover{ background:var(--pill); }
+.tabs-dropdown-item .tab-name{
+  flex:1;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.tabs-dropdown-item .tab-close{
+  font-size:1.15em;
+  color:var(--muted);
+  padding:2px 6px;
+  cursor:pointer;
+  line-height:1;
+  border-radius:4px;
+  flex-shrink:0;
+}
+.tabs-dropdown-item .tab-close:hover{
+  color:var(--red);
+  background:rgba(255,123,114,.12);
+}
+.tabs-dropdown-empty,
+.tabs-dropdown-loading{
+  padding:14px 11px;
+  text-align:center;
+  color:var(--muted);
+  font-size:var(--fs-tab);
+}
+.tabs-dropdown-loading{ color:var(--text); }
+
+.tab{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  padding:3px 9px;
+  min-height:28px;
+  max-height:28px;
+  background:var(--pill);
+  border:1px solid transparent;
+  color:var(--muted);
+  font-family:inherit;
+  font-size:var(--fs-tab);
+  line-height:1.15;
+  border-radius:9px 9px 0 0;
+  cursor:pointer;
+  user-select:none;
+  -webkit-user-select:none;
+  -webkit-tap-highlight-color:transparent;
+  flex-shrink:0;
+  max-width:220px;
+  transition:background .15s,color .15s,border-color .15s;
+}
+.tab:hover{ background:var(--pill-hi); color:var(--text); }
+.tab.active{
+  min-height:32px;
+  max-height:32px;
+  padding-bottom:4px;
+  background:var(--bg);
+  border-color:var(--pill-hi);
+  border-bottom:none;
+  margin-bottom:-1px;
+  color:var(--text);
+}
+.tab .tb-name{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  line-height:1;
+}
+.tab .tb-close{
+  font-size:1.05em;
+  padding:0 2px 0 3px;
+  color:inherit;
+  cursor:pointer;
+  line-height:1;
+}
+.tab .tb-close:hover{ color:var(--red); }
+.tab-add{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:26px;
+  height:26px;
+  min-height:26px;
+  max-height:26px;
+  background:var(--pill);
+  border:none;
+  border-radius:6px;
+  color:var(--text);
+  font-size:0;
+  line-height:0;
+  cursor:pointer;
+  touch-action:manipulation;
+  user-select:none;
+  -webkit-user-select:none;
+  -webkit-tap-highlight-color:transparent;
+  flex-shrink:0;
+  padding:0;
+  transition:background .15s;
+  margin-bottom:2px;
+}
+.tab-add:hover{ background:var(--pill-hi); }
+.tab-add svg{ width:13px; height:13px; display:block; pointer-events:none; }
+.tab.tab-run .tb-name,
+.tab.tab-run.active .tb-name{ color:var(--accent); }
+
+.toolbar{
+  display:flex;
+  flex-wrap:wrap;
+  column-gap:3px;
+  row-gap:3px;
+  align-items:center;
+  flex-shrink:0;
+  padding:5px 8px;
+  background:var(--bg);
+}
+.btn-group{
+  display:inline-flex;
+  gap:3px;
+  align-items:center;
+  padding-right:4px;
+  border-right:1px solid transparent;
+}
+.btn-group.last-visible{ border-right:none; padding-right:0; }
+.btn-group.push-right{ margin-left:auto; border-right:none; padding-right:0; gap:6px; }
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  padding:0 8px;
+  min-height:30px;
+  font-family:inherit;
+  font-size:var(--fs-btn);
+  color:var(--text);
+  background:var(--pill);
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+  touch-action:manipulation;
+  user-select:none;
+  -webkit-user-select:none;
+  -webkit-tap-highlight-color:transparent;
+  transition:transform .14s cubic-bezier(.34,1.56,.64,1),background-color .15s,color .15s;
+}
+.btn:hover{ background-color:var(--pill-hi); }
+.btn:active{ transform:scale(.94); }
+.btn.pressed{ background:#e0e0e0; color:#1a1a1a; }
+.btn.pressed:hover{ background:#d0d0d0; }
+.btn[disabled]{ opacity:.4; pointer-events:none; color:var(--muted); }
+.btn[disabled] .ico{ opacity:.5; }
+.btn.warn-state{ color:var(--muted); }
+.btn .ico{ width:15px; height:15px; flex-shrink:0; display:block; }
+.btn:not(.always-label) .ico + span { display:none !important; }
+
+.btn-save-as{ background-color:#1e3a5f; color:#a8c8e8; }
+.btn-save-as:hover{ background-color:#2a4a6f; }
+.btn-select-all{ background-color:#4a3a1e; color:#e8d8a8; }
+.btn-select-all:hover{ background-color:#5a4a2e; }
+.btn-run{ background-color:#1e3a3a; color:#a8e8e8; }
+.btn-run:hover{ background-color:#2a4a4a; }
+
+.mode-toggle{
+  display:inline-flex;
+  align-items:center;
+  gap:2px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:2px;
+}
+.mode-btn{
+  background:transparent;
+  color:var(--muted);
+  font-weight:600;
+  min-height:26px;
+  padding:0 8px;
+  font-size:var(--fs-btn);
+  border-radius:8px;
+}
+.mode-btn:hover{ background:var(--pill); color:var(--text); }
+.mode-btn.pressed{ background:#e0e0e0; color:#1a1a1a; }
+.mode-btn.pressed:hover{ background:#d0d0d0; }
+.sync-btn{
+  min-width:30px;
+  min-height:30px;
+  padding:0 8px;
+  font-size:13px;
+  font-weight:700;
+  color:var(--muted);
+}
+.sync-btn:hover{ background:var(--pill-hi); }
+.sync-btn.ok{ color:var(--accent); }
+.sync-btn.err{ color:var(--red); }
+.sync-btn.local{ color:var(--muted); }
+.sync-btn.loading{ color:var(--yellow); animation:blink-loading .9s ease-in-out infinite; }
+@keyframes blink-loading{ 0%,100%{opacity:1} 50%{opacity:.35} }
+@keyframes pulse-warn{
+  0%,100%{ outline:0 solid var(--yellow); outline-offset:0; }
+  50%{ outline:3px solid var(--yellow); outline-offset:2px; }
+}
+.btn.pulse-warn{ animation:pulse-warn .55s ease-in-out 2; }
+
+#stats{
+  flex-shrink:0;
+  font-size:11px;
+  color:var(--muted);
+  white-space:nowrap;
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  padding:0 10px 3px 10px;
+  gap:12px;
+  line-height:1.3;
+  background:var(--bg);
+  letter-spacing:.2px;
+  border-bottom:1px solid var(--line);
+}
+.ro-badge{
+  display:inline-block;
+  color:var(--yellow);
+  border:1px solid var(--yellow);
+  padding:0 4px;
+  font-size:.82em;
+  font-weight:bold;
+  letter-spacing:.5px;
+  border-radius:3px;
+  vertical-align:middle;
 }
 
-/* Unified Input Field Style */
-input[type="text"] {
-  background-color: #000000;
-  color: #d4d4d4;
-  border: 1px solid rgba(85, 85, 85, 0.5);
-  border-radius: 3px;
-  padding: 0.45em 0.4em;
-  font-size: 85%;
-  font-family: sans-serif;
-  outline: none;
-  box-sizing: border-box;
-  line-height: 1.4;
-  vertical-align: middle;
-  width: 7em;
+#ta{
+  flex:1 1 auto;
+  width:100%;
+  min-height:0;
+  resize:none;
+  border:none;
+  outline:0;
+  padding:10px 14px;
+  margin:0;
+  background:var(--surface);
+  color:#e4e4e4;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"DejaVu Sans Mono","Liberation Mono",monospace;
+  font-size:var(--fs-body);
+  line-height:1.5;
+  white-space:pre;
+  overflow:auto;
+  caret-color:var(--accent);
+  user-select:text;
+  -webkit-user-select:text;
 }
+#ta.wrap{ white-space:pre-wrap; overflow-wrap:break-word; word-break:break-word; }
+#ta[readonly]{ color:#e4e4e4; caret-color:transparent; }
+body.readonly-view .edit-only{ display:none !important; }
 
-#filename { width: 8.4em; }
-
-input[type="text"]:focus {
-  border-color: #007acc;
+.modal-overlay{
+  position:fixed; inset:0;
+  background:rgba(0,0,0,.6);
+  display:flex; align-items:center; justify-content:center;
+  z-index:1000; padding:16px;
 }
-
-input[type="checkbox"] { accent-color: #007acc; vertical-align: middle; }
-
-#open > input { display: none; }
-
-@media print {
-  nav { display: none; }
-  textarea { height: 100%; border: none; }
+.modal-overlay[hidden]{ display:none; }
+.modal-window{
+  width:min(520px,100%);
+  max-height:calc(100vh - 32px);
+  background:var(--surface);
+  border-radius:24px;
+  display:flex; flex-direction:column; overflow:hidden;
+  animation:modal-in .28s cubic-bezier(.34,1.4,.64,1);
 }
-  </style>
-</head>
-<body>
-  <textarea id="textbox" autofocus="autofocus" placeholder="type here" spellcheck="false"></textarea>
-  <nav>
-    <span id="stats">
-      <span id="char-count-with-spaces">0</span> chars
-      <span id="char-count-without-spaces">0</span> no spaces
-      <span id="line-count">0</span> lines
-    </span>
-    <span id="controls">
-      <input type="checkbox" id="wrap" checked />
-      <label for="wrap">wrap</label>
-      <button id="select-all">select all</button>
-      <span id="open">
-        <input type="file" value="open" />
-        <a href="#">open</a>
-      </span>
-      <span id="save">
-        <input id="filename" type="text" value="index.html" placeholder="index.html" />
-        <a href="#">save</a>
-      </span>
-    </span>
-  </nav>
-  <script>
-    const textbox = document.getElementById('textbox');
-    const charCountWithSpaces = document.getElementById('char-count-with-spaces');
-    const charCountWithoutSpaces = document.getElementById('char-count-without-spaces');
-    const lineCount = document.getElementById('line-count');
-
-    function updateStats() {
-      const text = textbox.value;
-      charCountWithSpaces.textContent = text.length;
-      charCountWithoutSpaces.textContent = text.replace(/\s/g, '').length;
-      lineCount.textContent = text.length === 0 ? 0 : text.split('\n').length;
-    }
-
-    textbox.addEventListener('input', updateStats);
-    window.addEventListener('DOMContentLoaded', updateStats);
-
-    const wrapCheckbox = document.getElementById('wrap');
-    wrapCheckbox.addEventListener('change', () => {
-      if (wrapCheckbox.checked) {
-        textbox.style.whiteSpace = 'pre-wrap';
-        textbox.style.overflowX = 'hidden';
-      } else {
-        textbox.style.whiteSpace = 'pre';
-        textbox.style.overflowX = 'auto';
-      }
-    });
-
-    document.getElementById('select-all').addEventListener('click', () => {
-      textbox.select();
-    });
-
-    document.querySelector('#open a').addEventListener('click', (e) => {
-      e.preventDefault();
-      document.querySelector('#open input').click();
-    });
-
-    document.querySelector('#open input').addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          textbox.value = event.target.result;
-          updateStats();
-        };
-        reader.readAsText(file);
-      }
-    });
-
-    document.querySelector('#save a').addEventListener('click', (e) => {
-      e.preventDefault();
-      const filename = document.getElementById('filename').value || 'index.html';
-      const blob = new Blob([textbox.value], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = filename;
-      link.click();
-      URL.revokeObjectURL(url);
-    });
-
-    if ('serviceWorker' in navigator) {
-      const swCode = `
-        self.addEventListener('install', e => e.waitUntil(self.skipWaiting()));
-        self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
-        self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => new Response('Offline'))));
-      `;
-      const blob = new Blob([swCode], { type: 'application/javascript' });
-      const swUrl = URL.createObjectURL(blob);
-      navigator.serviceWorker.register(swUrl).catch(() => {});
-    }
-  </script>
-</body>
-</html>ty:1} }
+@keyframes modal-in{ from{transform:scale(.92);opacity:0} to{transform:scale(1);opacity:1} }
 .modal-title{
   color:var(--text);
   padding:18px 18px 7px;
@@ -252,6 +475,125 @@ body.run-active #runPane{ display:flex; }
 .run-frame-wrap{
   flex:1 1 auto; min-height:0; display:flex;
   background:#fff; border:none; position:relative;
+}
+.run-frame-wrap iframe.run-frame{
+  position:absolute; inset:0; width:100%; height:100%;
+  border:none; background:#fff; display:none;
+  color-scheme:light; margin:0; padding:0;
+}
+.run-frame-wrap iframe.run-frame.run-visible{ display:block; }
+.run-frame-wrap:fullscreen{ background:#fff; }
+.run-frame-wrap:fullscreen iframe.run-frame{ position:absolute; inset:0; width:100%; height:100%; }
+</style>
+</head>
+<body>
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+  <symbol id="i-save" viewBox="0 0 24 24">
+    <path d="M12 4v10M7 9l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="i-open" viewBox="0 0 24 24">
+    <path d="M4 9V4h5l2 2h7a2 2 0 0 1 2 2v1" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M3 9h16a1.5 1.5 0 0 1 1.45 1.9l-1.6 6A2 2 0 0 1 16.9 18H5a2 2 0 0 1-2-2V9Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="i-tab" viewBox="0 0 24 24">
+    <path d="M10 6h10M10 12h10M10 18h10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    <path d="M3 10l3 2-3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="i-untab" viewBox="0 0 24 24">
+    <path d="M10 6h10M10 12h10M10 18h10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    <path d="M6 10l-3 2 3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="i-wrap" viewBox="0 0 24 24">
+    <path d="M4 6h16M4 12h13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    <path d="M17 12a3 3 0 0 1 0 6H9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    <path d="M11 15l-2 3 2 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="i-all" viewBox="0 0 24 24">
+    <rect x="3.5" y="3.5" width="17" height="17" rx="2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-dasharray="3 2.5"/>
+    <path d="M8 12l2.5 2.5L16 9.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="i-cut" viewBox="0 0 24 24">
+    <circle cx="6" cy="6" r="2.5" fill="none" stroke="currentColor" stroke-width="2"/>
+    <circle cx="6" cy="18" r="2.5" fill="none" stroke="currentColor" stroke-width="2"/>
+    <path d="M20 4L8.5 15.5M20 20L8.5 8.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24">
+    <rect x="8" y="8" width="12" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="2"/>
+    <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="i-paste" viewBox="0 0 24 24">
+    <path d="M9 4H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    <rect x="9" y="2.5" width="6" height="4" rx="1.5" fill="none" stroke="currentColor" stroke-width="2"/>
+  </symbol>
+  <symbol id="i-run" viewBox="0 0 24 24">
+    <path d="M8 5.5v13l10-6.5-10-6.5Z" fill="currentColor"/>
+  </symbol>
+  <symbol id="i-link" viewBox="0 0 24 24">
+    <path d="M10 14a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1.5 1.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M14 10a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1.5-1.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24">
+    <path d="M20 12A8 8 0 1 1 12 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    <path d="M9 1L12 4L9 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="i-fullscreen" viewBox="0 0 24 24">
+    <path d="M4 9V6a2 2 0 0 1 2-2h3M15 4h3a2 2 0 0 1 2 2v3M20 15v3a2 2 0 0 1-2 2h-3M9 20H6a2 2 0 0 1-2-2v-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="i-exitfs" viewBox="0 0 24 24">
+    <path d="M9 4v3a2 2 0 0 1-2 2H4M20 9h-3a2 2 0 0 1-2-2V4M15 20v-3a2 2 0 0 1 2-2h3M4 15h3a2 2 0 0 1 2 2v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="i-close" viewBox="0 0 24 24">
+    <path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24">
+    <path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="i-chevron-down" viewBox="0 0 24 24">
+    <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
+</svg>
+
+<div class="tabs-row" id="tabsRow">
+  <button class="tabs-dropdown-btn" id="tabsDropdownBtn" title="Tabs from other devices" aria-label="Tabs from other devices">
+    <svg aria-hidden="true"><use href="#i-chevron-down"/></svg>
+  </button>
+  <div class="tabs-list" id="tabs"></div>
+  <div class="tabs-dropdown" id="tabsDropdown"></div>
+</div>
+
+<div class="toolbar" id="toolbar">
+  <div class="btn-group edit-only">
+    <button class="btn always-label btn-save-as" data-act="save" title="Save As">
+      <svg class="ico" aria-hidden="true"><use href="#i-save"/></svg>
+      <span>Save As</span>
+    </button>
+    <button class="btn" data-act="open" title="Open file">
+      <svg class="ico" aria-hidden="true"><use href="#i-open"/></svg>
+      <span>Open</span>
+    </button>
+  </div>
+  <div class="btn-group edit-only">
+    <button class="btn" data-act="tab" title="Indent">
+      <svg class="ico" aria-hidden="true"><use href="#i-tab"/></svg>
+      <span>Tab</span>
+    </button>
+    <button class="btn" data-act="untab" title="Unindent">
+      <svg class="ico" aria-hidden="true"><use href="#i-untab"/></svg>
+      <span>Untab</span>
+    </button>
+  </div>
+  <div class="btn-group">
+    <button class="btn" data-act="wrap" id="wrapBtn" title="Toggle word wrap">
+      <svg class="ico" aria-hidden="true"><use href="#i-wrap"/></svg>
+      <span id="wrapLabel">Wrap</span>
+    </button>
+  </div>
+  <div class="btn-group">
+    <button class="btn always-label btn-select-all" data-act="all" title="Select All">
+      <svg class="ico" aria-hidden="true"><use href="#i-all"/></svg>
+      <span>Select ;
 }
 .run-frame-wrap iframe.run-frame{
   position:absolute; inset:0; width:100%; height:100%;
